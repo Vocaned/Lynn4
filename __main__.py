@@ -19,24 +19,9 @@ def create_bot(token: str, prefix: str) -> lightbulb.Bot:
     return bot
 
 if __name__ == '__main__':
-    # Check config
-    if not os.path.exists('config.json'):
-        logging.critical('Config does not exist. A config.json file was created, please edit the file before running the bot again.')
-        
-        with open('config.json', 'w') as f:
-            config_template = {'token': None, 'prefix': '%'}
-            json.dump(config_template, f, indent=2)
-
-        exit(1)
-
-    token = utils.get_config('token')
-    if not token:
-        logging.critical('Token not found in config.json. Please edit the file before running the bot again.')
-        exit(1)
-
     # uvloops improves performance, but is only available for UNIX systems.
     if os.name != "nt":
         import uvloop
         uvloop.install()
 
-    create_bot(token, utils.get_config('prefix')).run()
+    create_bot(utils.config.get('token'), utils.config.get('prefix')).run()
