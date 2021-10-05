@@ -1,7 +1,5 @@
 # my discord bot i guess
 
-waiting for discord.py update
-
 ### History
 Originally I made Lynn around 2017 with Discord.JS. I was mainly a C# developer back then, but wanted to try something different so I chose JavaScript.
 
@@ -13,3 +11,4 @@ Then comes 2019, and at this point I was pretty much exclusively coding in Pytho
 
 I wasn't planning on making rewriting the bot a semi-yearly thing, but in 2021 Discord released a bot API update that allows better integration with the client, and I started to get disgusted by the spaghetti code that Lynn3 grew into, so I figured that I might as well start from scratch again, with Lynn4.
 
+Later in 2021, [discord.py was discontinued](https://gist.github.com/Rapptz/4a2f62751b9600a31a0d3c78100287f1). As a replacement I decided to try [hikari](https://github.com/hikari-py/hikari) instead.
