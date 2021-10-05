@@ -1,10 +1,8 @@
 import os
-from pathlib import Path
 import logging
 import hikari
 import lightbulb
 import lynn
-import json
 import glob
 
 def create_bot(token: str, prefix: str) -> lightbulb.Bot:

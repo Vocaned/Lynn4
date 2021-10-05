@@ -1,6 +1,5 @@
 import hikari
 import lightbulb
-import asyncio
 import lynn
 
 class Presence(lynn.Plugin):
@@ -8,6 +7,7 @@ class Presence(lynn.Plugin):
     @lightbulb.check(lightbulb.owner_only)
     @lightbulb.command()
     async def activity(self, ctx: lightbulb.Context, *, msg: str):
+        """Sets the bot's activity"""
         if msg:
             if msg.lower().startswith('competing in'):
                 await self.bot.update_presence(activity=hikari.Activity(type=hikari.ActivityType.COMPETING, name=msg[12:]))
@@ -23,7 +23,8 @@ class Presence(lynn.Plugin):
     @lightbulb.check(lightbulb.owner_only)
     @lightbulb.command()
     async def presence(self, ctx: lightbulb.Context, *, msg: str):
-            await self.bot.update_presence(status=msg.lower())
+        """Sets the bot's presence"""
+        await self.bot.update_presence(status=msg.lower())
 
 def load(bot: lightbulb.Bot):
     bot.add_plugin(Presence(bot))

@@ -3,6 +3,7 @@ import os
 import hikari
 import lightbulb
 import logging
+import time
 
 class Config:
     config_template = {
@@ -52,8 +53,6 @@ class Config:
     def get(self, key: str, default=None):
         return self.dict.get(key, default)
 
-config = Config()
-
 
 class Plugin(lightbulb.Plugin):
     """Improved plugin class"""
@@ -69,11 +68,18 @@ class Plugin(lightbulb.Plugin):
                 if len(e.errors['message_reference']['_errors']) == 1 and e.errors['message_reference']['_errors'][0]['code'] == 'REPLIES_UNKNOWN_MESSAGE':
                     # Resend the response without a reply, since the message no longer exists
                     # TODO: Assumes args[0] is message, need to investigate if it can be something else as well
-                    msg = ()
+                    msg = []
                     if args:
-                        msg = list(args)
-                        msg[0] = f'{ctx.author.mention}, {msg[0]}'
+                        msg.append(f'{ctx.author.mention}, {args[0]}')
+                    else:
+                        msg.append(ctx.author.mention)
                     return await ctx.respond(*msg, **kwargs)
             except KeyError:
                 pass
             return None
+
+ERROR_COLOR = 0xff4444
+EMBED_COLOR = 0x8f8f8f
+
+config = Config()
+startup_time = time.time()

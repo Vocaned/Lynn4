@@ -19,8 +19,5 @@ def load(bot: lightbulb.Bot):
     bot.subscribe(hikari.MessageCreateEvent, handle)
 
 def unload(bot: lightbulb.Bot):
-    if not typingindicator:
-        return
-
     bot.unsubscribe(hikari.MessageCreateEvent, handle)
     bot.subscribe(hikari.MessageCreateEvent, bot.handle)

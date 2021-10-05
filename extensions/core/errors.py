@@ -16,20 +16,22 @@ class Errors(lynn.Plugin):
         or not event.command:
             return
         
-        logging.error(f'Ignoring exception in {event.command}')
-        try:
-            with open('error.dat', 'w') as f:
-                f.write('\n'.join(traceback.format_exception(*event.exc_info)))
-        except:
-            logging.error('Could not write error into error.dat')
 
-        if not event.context:
-            return
+        if isinstance(error, errors.CommandInvocationError) or isinstance(error, errors.SlashCommandInvocationError):
+            logging.error(f'Ignoring exception in {event.command}')
+            try:
+                with open('error.dat', 'w') as f:
+                    f.write('\n'.join(traceback.format_exception(*event.exc_info)))
+            except:
+                logging.error('Could not write error into error.dat')
 
-        try:
-            await event.context.message.add_reaction('\N{NO ENTRY SIGN}')
-        except:
-            pass
+            if not event.context:
+                return
+
+            try:
+                await event.context.message.add_reaction('\N{NO ENTRY SIGN}')
+            except:
+                pass
         
         errtype = None
         errmsg = None
@@ -89,12 +91,13 @@ class Errors(lynn.Plugin):
         else:
             errtype = f'Unknown error type {type(event.exception)} occured.'
         
-        embed = hikari.Embed(color=0xff4444, title=errtype, description=errmsg)
+        embed = hikari.Embed(color=lynn.ERROR_COLOR, title=errtype, description=errmsg)
         await self.respond(event.context, embed=embed)
 
     @lightbulb.check(lightbulb.owner_only)
     @lightbulb.command()
     async def debug(self, ctx: lightbulb.Context):
+        """Displays traceback from the last error"""
         with open('error.dat', 'r') as errors:
             error = errors.read()
             if not error:
