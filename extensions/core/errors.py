@@ -3,9 +3,9 @@ import lightbulb
 from lightbulb import errors
 import logging
 import traceback
-from utils import respond
+import lynn
 
-class Errors(lightbulb.Plugin):
+class Errors(lynn.Plugin):
 
     @lightbulb.plugins.listener(lightbulb.CommandErrorEvent)
     async def handle_command_error(self, event: lightbulb.CommandErrorEvent):
@@ -90,7 +90,7 @@ class Errors(lightbulb.Plugin):
             errtype = f'Unknown error type {type(event.exception)} occured.'
         
         embed = hikari.Embed(color=0xff4444, title=errtype, description=errmsg)
-        await respond(event.context, embed=embed)
+        await self.respond(event.context, embed=embed)
 
     @lightbulb.check(lightbulb.owner_only)
     @lightbulb.command()
@@ -98,12 +98,12 @@ class Errors(lightbulb.Plugin):
         with open('error.dat', 'r') as errors:
             error = errors.read()
             if not error:
-                await respond(ctx, 'No errors logged.')
+                await self.respond(ctx, 'No errors logged.')
             else:
-                await respond(ctx, f'```{error}```')
+                await self.respond(ctx, f'```{error}```')
 
 def load(bot: lightbulb.Bot):
-    bot.add_plugin(Errors())
+    bot.add_plugin(Errors(bot))
 
 def unload(bot: lightbulb.Bot):
     bot.remove_plugin('Errors')
