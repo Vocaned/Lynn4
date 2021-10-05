@@ -1,11 +1,11 @@
 import hikari
 import lightbulb
-import utils
+import lynn
 
 global_bot = None
 
 async def handle(event: hikari.MessageCreateEvent) -> None:
-    if utils.config.get('typingindicator'):
+    if lynn.config.get('typingindicator'):
         async with global_bot.rest.trigger_typing(event.channel_id):
             await global_bot.handle(event)
     else:

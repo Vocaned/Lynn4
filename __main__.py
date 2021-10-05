@@ -3,7 +3,7 @@ from pathlib import Path
 import logging
 import hikari
 import lightbulb
-import utils
+import lynn
 import json
 import glob
 
@@ -24,4 +24,4 @@ if __name__ == '__main__':
         import uvloop
         uvloop.install()
 
-    create_bot(utils.config.get('token'), utils.config.get('prefix')).run()
+    create_bot(lynn.config.get('token'), lynn.config.get('prefix')).run(activity=lynn.config.get('activity'), status=lynn.config.get('status'))
