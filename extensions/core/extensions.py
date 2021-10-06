@@ -4,28 +4,45 @@ import lynn
 
 class Extensions(lynn.Plugin):
 
-    # TODO: catch extension exceptions
-
     @lightbulb.check(lightbulb.owner_only)
     @lightbulb.command()
     async def unload(self, ctx: lightbulb.Context, name: str):
         """Unloads an extension"""
-        ctx.bot.unload_extension('extensions.'+name)
-        await self.respond(ctx, f'Extension `{name}` successfully unloaded.')
+        try:
+            ctx.bot.unload_extension('extensions.'+name)
+            await self.respond(ctx, f'Extension `{name}` successfully unloaded.')
+        except lightbulb.errors.ExtensionNotLoaded:
+            raise lynn.Error(text=f'Extension `{name}` is not loaded.')
+        except lightbulb.errors.ExtensionMissingUnload:
+            raise lynn.Error(text=f'Extension `{name}` does not have a valid unload method.')
 
     @lightbulb.check(lightbulb.owner_only)
     @lightbulb.command()
     async def load(self, ctx: lightbulb.Context, name: str):
         """Loads an extension"""
-        ctx.bot.load_extension('extensions.'+name)
-        await self.respond(ctx, f'Extension `{name}` successfully loaded.')
+        try:
+            ctx.bot.load_extension('extensions.'+name)
+            await self.respond(ctx, f'Extension `{name}` successfully loaded.')
+        except lightbulb.errors.ExtensionAlreadyLoaded:
+            raise lynn.Error(text=f'Extension `{name}` is already loaded.')
+        except lightbulb.errors.ExtensionMissingLoad:
+            raise lynn.Error(text=f'File `{name}` is not a valid extension.')
     
     @lightbulb.check(lightbulb.owner_only)
     @lightbulb.command()
     async def reload(self, ctx: lightbulb.Context, name: str):
         """Reloads an extension"""
-        ctx.bot.reload_extension('extensions.'+name)
-        await self.respond(ctx, f'Extension `{name}` successfully reloaded.')
+        try:
+            ctx.bot.reload_extension('extensions.'+name)
+            await self.respond(ctx, f'Extension `{name}` successfully reloaded.')
+        except lightbulb.errors.ExtensionNotLoaded:
+            raise lynn.Error(text=f'Extension `{name}` is not loaded.')
+        except lightbulb.errors.ExtensionMissingUnload:
+            raise lynn.Error(text=f'Extension `{name}` does not have a valid unload method.')
+        except lightbulb.errors.ExtensionAlreadyLoaded:
+            raise lynn.Error(text=f'Extension `{name}` is already loaded. This should never happen! Is the same extension running twice?')
+        except lightbulb.errors.ExtensionMissingLoad:
+            raise lynn.Error(text=f'File `{name}` is not a valid extension.')
 
     @lightbulb.check(lightbulb.owner_only)
     @lightbulb.command()
