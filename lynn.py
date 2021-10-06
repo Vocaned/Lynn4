@@ -4,6 +4,7 @@ import hikari
 import lightbulb
 import logging
 import time
+import lavasnek_rs
 
 class Config:
     config_template = {
@@ -11,7 +12,9 @@ class Config:
         'prefix': '%', # Bot's prefix
         'typingindicator': False, # Should the bot trigger "is typing..." activity when processing commands
         'status': 'online', # Bot's default status
-        'activity': None # Bot's default activity
+        'activity': None, # Bot's default activity
+        'lavalink_pass': "password", # Password for lavalink instance
+        'lavalink_host': '127.0.0.1' # Lavalink instance host, null to disable lavalink
     }
     required_values = ('token',)
 
@@ -55,7 +58,7 @@ class Config:
 
 
 class Plugin(lightbulb.Plugin):
-    """Improved plugin class"""
+    """Improved Plugin class"""
     def __init__(self, bot: lightbulb.Bot):
         super().__init__()
         self.bot = bot
@@ -77,6 +80,26 @@ class Plugin(lightbulb.Plugin):
             except KeyError:
                 pass
             return None
+
+class Error(lightbulb.errors.CommandError):
+    """Custom error message, raise to send an error embed."""
+
+    def __init__(self, title: str = None, text: str = None):
+        self.title: str = title
+        """The error title."""
+        self.text: str = text
+        """The error text."""
+
+class Data:
+    """Global data shared across the entire bot."""
+    def __init__(self) -> None:
+        self.lavalink: lavasnek_rs.Lavalink = None
+
+class Bot(lightbulb.Bot):
+    """Improved Bot class"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.data = Data()
 
 ERROR_COLOR = 0xff4444
 EMBED_COLOR = 0x8f8f8f

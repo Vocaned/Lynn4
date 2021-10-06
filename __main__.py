@@ -5,8 +5,8 @@ import lightbulb
 import lynn
 import glob
 
-def create_bot(token: str, prefix: str) -> lightbulb.Bot:
-    bot = lightbulb.Bot(token=token, prefix=lightbulb.when_mentioned_or(prefix), intents=hikari.Intents.ALL)
+def create_bot(token: str, prefix: str) -> lynn.Bot:
+    bot = lynn.Bot(token=token, prefix=lightbulb.when_mentioned_or(prefix), intents=hikari.Intents.ALL)
 
     for extension in [f.replace('.py', '').replace('/', '.').replace('\\', '.') for f in glob.glob('extensions/**/*.py', recursive=True)]:
         try:

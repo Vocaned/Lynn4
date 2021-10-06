@@ -11,8 +11,8 @@ class Shutdown(lynn.Plugin):
         await self.respond(ctx, 'Goodbye!')
         await self.bot.close()
 
-def load(bot: lightbulb.Bot):
+def load(bot: lynn.Bot):
     bot.add_plugin(Shutdown(bot))
 
-def unload(bot: lightbulb.Bot):
+def unload(bot: lynn.Bot):
     bot.remove_plugin('Shutdown')

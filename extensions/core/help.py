@@ -45,7 +45,7 @@ class Help(lynn.Plugin):
             await self.plugin.respond(ctx, embed=embed)
 
 
-def load(bot: lightbulb.Bot):
+def load(bot: lynn.Bot):
     global original_help_command
 
     original_help_command = bot.help_command
@@ -53,6 +53,6 @@ def load(bot: lightbulb.Bot):
     bot.help_command = help_plugin.CustomHelp(bot, help_plugin)
     bot.add_plugin(help_plugin)
 
-def unload(bot: lightbulb.Bot):
+def unload(bot: lynn.Bot):
     bot.remove_plugin('Help')
     bot.help_command = original_help_command

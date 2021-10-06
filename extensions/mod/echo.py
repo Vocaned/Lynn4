@@ -11,8 +11,8 @@ class Echo(lynn.Plugin):
         """Echoes"""
         await self.respond(ctx, msg)
 
-def load(bot: lightbulb.Bot):
+def load(bot: lynn.Bot):
     bot.add_plugin(Echo(bot))
 
-def unload(bot: lightbulb.Bot):
+def unload(bot: lynn.Bot):
     bot.remove_plugin('Echo')

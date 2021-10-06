@@ -4,6 +4,8 @@ import lynn
 
 class Extensions(lynn.Plugin):
 
+    # TODO: catch extension exceptions
+
     @lightbulb.check(lightbulb.owner_only)
     @lightbulb.command()
     async def unload(self, ctx: lightbulb.Context, name: str):
@@ -31,8 +33,8 @@ class Extensions(lynn.Plugin):
         """Lists all extensions"""
         await self.respond(ctx, 'Extensions: ```' + ', '.join([e.lstrip('extensions.') for e in ctx.bot.extensions]) +  '```')
 
-def load(bot: lightbulb.Bot):
+def load(bot: lynn.Bot):
     bot.add_plugin(Extensions(bot))
 
-def unload(bot: lightbulb.Bot):
+def unload(bot: lynn.Bot):
     bot.remove_plugin('Extensions')

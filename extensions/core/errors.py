@@ -88,6 +88,10 @@ class Errors(lynn.Plugin):
             errtype = f'An uncaught exception occured in `{event.command.name}`'
             errmsg = error.text
 
+        elif isinstance(error, lynn.Error):
+            errtype = error.title
+            errmsg = error.text
+
         else:
             errtype = f'Unknown error type {type(event.exception)} occured.'
         
@@ -105,8 +109,8 @@ class Errors(lynn.Plugin):
             else:
                 await self.respond(ctx, f'```{error}```')
 
-def load(bot: lightbulb.Bot):
+def load(bot: lynn.Bot):
     bot.add_plugin(Errors(bot))
 
-def unload(bot: lightbulb.Bot):
+def unload(bot: lynn.Bot):
     bot.remove_plugin('Errors')

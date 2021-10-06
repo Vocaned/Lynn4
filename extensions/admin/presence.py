@@ -26,8 +26,8 @@ class Presence(lynn.Plugin):
         """Sets the bot's presence"""
         await self.bot.update_presence(status=msg.lower())
 
-def load(bot: lightbulb.Bot):
+def load(bot: lynn.Bot):
     bot.add_plugin(Presence(bot))
 
-def unload(bot: lightbulb.Bot):
+def unload(bot: lynn.Bot):
     bot.remove_plugin('Presence')

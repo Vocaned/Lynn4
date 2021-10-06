@@ -11,13 +11,13 @@ async def handle(event: hikari.MessageCreateEvent) -> None:
     else:
         await global_bot.handle(event)
 
-def load(bot: lightbulb.Bot):
+def load(bot: lynn.Bot):
     global global_bot
     global_bot = bot
     # Overwrite lightbulb message handler
     bot.unsubscribe(hikari.MessageCreateEvent, bot.handle)
     bot.subscribe(hikari.MessageCreateEvent, handle)
 
-def unload(bot: lightbulb.Bot):
+def unload(bot: lynn.Bot):
     bot.unsubscribe(hikari.MessageCreateEvent, handle)
     bot.subscribe(hikari.MessageCreateEvent, bot.handle)

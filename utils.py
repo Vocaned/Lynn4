@@ -23,7 +23,7 @@ def td_format(td_object):
 
 def bytes2human(n):
     # http://code.activestate.com/recipes/578019
-    symbols = ('KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB')
+    symbols = ('KiB', 'MiB', 'GiB', 'TiB', 'PiB')
     prefix = {}
     for i, s in enumerate(symbols):
         prefix[s] = 1 << (i + 1) * 10
