@@ -1,18 +1,22 @@
-import os
+import glob
 import logging
+import os
+
 import hikari
 import lightbulb
+
 import lynn
-import glob
+
 
 def create_bot(token: str, prefix: str) -> lynn.Bot:
+    """Create and return bot"""
     bot = lynn.Bot(token=token, prefix=lightbulb.when_mentioned_or(prefix), intents=hikari.Intents.ALL)
 
     for extension in [f.replace('.py', '').replace('/', '.').replace('\\', '.') for f in glob.glob('extensions/**/*.py', recursive=True)]:
         try:
             bot.load_extension(extension)
         except lightbulb.errors.ExtensionError as e:
-            logging.error(f'Failed to load extension: {e}')
+            logging.error('Failed to load extension: %s', e)
 
     return bot
 

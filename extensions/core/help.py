@@ -10,7 +10,7 @@ class Help(lynn.Plugin):
             self.bot = bot
             self.plugin = plugin
             if self.bot.get_command("help") is None:
-                self.bot.add_command(_help_cmd)
+                self.bot.add_command(self)
 
         async def object_not_found(self, ctx: lightbulb.Context, name: str):
             await self.plugin.respond(ctx, embed=hikari.Embed(color=lynn.ERROR_COLOR, description=f'`{name}` is not a valid command, group or category.'))
@@ -37,7 +37,7 @@ class Help(lynn.Plugin):
             embed = hikari.Embed(color=lynn.EMBED_COLOR)
             embed.title = f'Help for command group `{group.name}`'
             embed.description = f'Usage: \n ```{ctx.clean_prefix}{lightbulb.get_command_signature(group)}```\n'
-            embed.description += lightbulb.get_help_text(command) or 'No help text provided.'
+            embed.description += lightbulb.get_help_text(group) or 'No help text provided.'
 
             if group.subcommands:
                 embed.add_field('Subcommands', ', '.join(f'`{c.name}`' for c in sorted(group.subcommands, key=lambda c: c.name)))

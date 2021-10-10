@@ -34,12 +34,12 @@ class Ping(lynn.Plugin):
         embed.add_field('CPU', f'\N{LEVEL SLIDER} {round(100-cpu.idle, 2)}%')
 
         start = time.time()
-        firstmsg = await self.respond(ctx, embed=embed)
+        firstmsg = await lynn.Response(embed=embed).send(ctx)
         end = time.time()
 
         embed.description = f'\N{BEATING HEART} Heartbeat Latency: **{int(self.bot.heartbeat_latency * 1000)} ms**\n'
         embed.description += f'\N{ANTENNA WITH BARS} API Latency: **{int((end - start) * 1000)} ms**'
-        
+
         await firstmsg.edit(embed=embed)
 
 def load(bot: lynn.Bot):

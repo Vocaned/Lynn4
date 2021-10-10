@@ -1,10 +1,15 @@
 import json
-import os
-import hikari
-import lightbulb
 import logging
+import os
 import time
+import sys
+import typing
+
+import hikari
+from hikari import undefined
 import lavasnek_rs
+import lightbulb
+
 
 class Config:
     config_template = {
@@ -20,29 +25,29 @@ class Config:
 
     def __init__(self, path='config.json'):
         if not os.path.exists(path):
-            logging.critical(f'Config does not exist. A {path} file was created, please edit it before running the bot again.')
-            with open(path, 'w') as f:
+            logging.critical('Config does not exist. A %s file was created, please edit it before running the bot again.', path)
+            with open(path, 'w', encoding='utf-8') as f:
                 json.dump(self.config_template, f, indent=2)
-            exit(1)
+            sys.exit(1)
 
         self.path = path
         self.dict = self.get_config()
 
         for val in self.required_values:
             if self.dict.get(val) is None:
-                logging.critical(f'Required value "{val}" not set in {self.path}. Please edit the file before running the bot again.')
-                exit(1)
+                logging.critical('Required value "%s" not set in %s. Please edit the file before running the bot again.', val, self.path)
+                sys.exit(1)
 
-        for val in self.config_template:
-            if val not in self.dict:
-                logging.warn(f'Required value "{val}" not found in {self.path}. The default value of "{self.config_template[val]}" was used. Please edit the file if necessary.')
-                self.set(val, self.config_template[val])                
+        for k, v in self.config_template.items():
+            if k not in self.dict:
+                logging.warning('Required value "%s" not found in %s. The default value of "%s" was used. Please edit the file if necessary.', val, self.path, v)
+                self.set(val, v)
 
     def get_config(self) -> dict:
         if not os.path.exists('config.json'):
             return None
-        
-        with open(self.path) as f:
+
+        with open(self.path, encoding='utf-8') as f:
             return json.load(f)
 
     def set(self, key: str, value) -> None:
@@ -50,7 +55,7 @@ class Config:
         self.dict = self.get_config()
         self.dict[key] = value
 
-        with open(self.path, 'w') as f:
+        with open(self.path, 'w', encoding='utf-8') as f:
             json.dump(self.dict, f, indent=2)
 
     def get(self, key: str, default=None):
@@ -63,24 +68,6 @@ class Plugin(lightbulb.Plugin):
         super().__init__()
         self.bot = bot
 
-    async def respond(self, ctx: lightbulb.Context, *args, **kwargs) -> hikari.Message:
-        try:
-            return await ctx.respond(reply=True, *args, **kwargs)
-        except hikari.BadRequestError as e:
-            try:
-                if len(e.errors['message_reference']['_errors']) == 1 and e.errors['message_reference']['_errors'][0]['code'] == 'REPLIES_UNKNOWN_MESSAGE':
-                    # Resend the response without a reply, since the message no longer exists
-                    # TODO: Assumes args[0] is message, need to investigate if it can be something else as well
-                    msg = []
-                    if args:
-                        msg.append(f'{ctx.author.mention}, {args[0]}')
-                    else:
-                        msg.append(ctx.author.mention)
-                    return await ctx.respond(*msg, **kwargs)
-            except KeyError:
-                pass
-            return None
-
 class Error(lightbulb.errors.CommandError):
     """Custom error message, raise to send an error embed."""
 
@@ -90,10 +77,65 @@ class Error(lightbulb.errors.CommandError):
         self.text: str = text
         """The error text."""
 
+class Response:
+    """Better response handling"""
+
+    def __init__(self, content: undefined.UndefinedOr[typing.Any] = undefined.UNDEFINED,
+        *,
+        attachment: undefined.UndefinedOr[hikari.files.Resourceish] = undefined.UNDEFINED,
+        attachments: undefined.UndefinedOr[typing.Sequence[hikari.files.Resourceish]] = undefined.UNDEFINED,
+        component: undefined.UndefinedOr[hikari.special_endpoints.ComponentBuilder] = undefined.UNDEFINED,
+        components: undefined.UndefinedOr[typing.Sequence[hikari.special_endpoints.ComponentBuilder]] = undefined.UNDEFINED,
+        embed: undefined.UndefinedOr[hikari.embeds_.Embed] = undefined.UNDEFINED,
+        embeds: undefined.UndefinedOr[typing.Sequence[hikari.embeds_.Embed]] = undefined.UNDEFINED,
+        nonce: undefined.UndefinedOr[str] = undefined.UNDEFINED,
+        tts: undefined.UndefinedOr[bool] = undefined.UNDEFINED,
+        reply: typing.Union[
+            undefined.UndefinedType, hikari.snowflakes.SnowflakeishOr[hikari.PartialMessage], bool
+        ] = undefined.UNDEFINED,
+        mentions_everyone: undefined.UndefinedOr[bool] = undefined.UNDEFINED,
+        mentions_reply: undefined.UndefinedOr[bool] = undefined.UNDEFINED,
+        user_mentions: undefined.UndefinedOr[
+            typing.Union[hikari.snowflakes.SnowflakeishSequence[hikari.users_.PartialUser], bool]
+        ] = undefined.UNDEFINED,
+        role_mentions: undefined.UndefinedOr[
+            typing.Union[hikari.snowflakes.SnowflakeishSequence[hikari.guilds.PartialRole], bool]
+        ] = undefined.UNDEFINED,):
+        self.content = content
+        if reply is False:
+            self.force_disable_reply = True
+        self.data = {
+            'attachment': attachment, 'attachments': attachments, 'component': component, 'components': components,
+            'embed': embed, 'embeds': embeds, 'nonce': nonce, 'tts': tts, 'mentions_everyone': mentions_everyone,
+            'mentions_reply': mentions_reply, 'user_mentions': user_mentions, 'role_mentions': role_mentions
+        }
+
+    async def send_channel(self, channel: hikari.SnowflakeishOr[hikari.TextableChannel], author_id: typing.Any[str, int, hikari.Snowflakeish]) -> hikari.Message:
+        try:
+            reply = True if not self.force_disable_reply else False
+            return await hikari.api.RESTClient.create_message(self.content, channel, reply=reply, **self.data)
+        except hikari.BadRequestError as e:
+            try:
+                # pylint: disable=unsubscriptable-object
+                if len(e.errors['message_reference']['_errors']) == 1 and e.errors['message_reference']['_errors'][0]['code'] == 'REPLIES_UNKNOWN_MESSAGE':
+                    msg = self.content
+                    if author_id:
+                        if msg:
+                            msg.append(f'<@{author_id}>, {self.content}')
+                        else:
+                            msg = f'<@{author_id}>'
+                    return await hikari.api.RESTClient.create_message(msg, channel, **self.data)
+            except KeyError:
+                pass
+            return None
+
+    async def send(self, ctx: lightbulb.Context) -> hikari.Message:
+        return await self.send_channel(ctx.channel_id, ctx.author.id)
+
 class Data:
     """Global data shared across the entire bot."""
     def __init__(self) -> None:
-        self.lavalink: lavasnek_rs.Lavalink = None
+        self.lavalink: lavasnek_rs.Lavalink = None # pylint: disable=no-member
 
 class Bot(lightbulb.Bot):
     """Improved Bot class"""

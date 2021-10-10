@@ -9,7 +9,7 @@ class Echo(lynn.Plugin):
     @lightbulb.command()
     async def echo(self, ctx: lightbulb.Context, *, msg: str):
         """Echoes"""
-        await self.respond(ctx, msg)
+        await lynn.Response(msg).send(ctx)
 
 def load(bot: lynn.Bot):
     bot.add_plugin(Echo(bot))
