@@ -1,9 +1,11 @@
-import hikari
-import lightbulb
-from lightbulb import errors
 import logging
 import traceback
+
+import hikari
+import lightbulb
 import lynn
+from lightbulb import errors
+
 
 class Errors(lynn.Plugin):
 

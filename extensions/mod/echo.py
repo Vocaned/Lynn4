@@ -1,6 +1,5 @@
 import hikari
 import lightbulb
-import asyncio
 import lynn
 
 class Echo(lynn.Plugin):

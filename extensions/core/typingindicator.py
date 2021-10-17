@@ -1,5 +1,4 @@
 import hikari
-import lightbulb
 import lynn
 
 global_bot = None

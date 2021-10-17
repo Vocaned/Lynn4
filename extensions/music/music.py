@@ -1,10 +1,12 @@
 # pylint: disable=no-member
 
+import logging
+
 import hikari
+import lavasnek_rs
 import lightbulb
 import lynn
-import lavasnek_rs
-import logging
+
 
 class EventHandler:
     """Events from the Lavalink server"""
