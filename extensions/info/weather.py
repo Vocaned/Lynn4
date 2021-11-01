@@ -2,7 +2,7 @@ import datetime
 import hikari
 import lightbulb
 import lynn
-from helpers import rest, escapeURL
+from helpers import rest, escape_url
 
 class Weather(lynn.Plugin):
 
@@ -10,7 +10,7 @@ class Weather(lynn.Plugin):
     @lightbulb.command()
     async def weather(self, ctx: lightbulb.Context, *, city: str):
         """Is it raining today?"""
-        geocoding = await rest('https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=en&q='+escapeURL(city))
+        geocoding = await rest('https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=en&q='+escape_url(city))
         data = await rest(f"https://api.darksky.net/forecast/{self.bot.config.get_secret('darksky')}/{geocoding[0]['lat']},{geocoding[0]['lon']}?exclude=minutely,hourly,daily,flags&units=si")
 
         if 'alerts' in data and data['alerts']:
@@ -35,7 +35,7 @@ class Weather(lynn.Plugin):
             + 'Humidity: ' + str(round(data['currently']['humidity'] * 100, 2)) + '%\n' \
             + 'Clouds: ' + str(round(data['currently']['cloudCover'] * 100, 2)) + '%\n' \
             + 'Wind: ' + str(data['currently']['windSpeed']) + ' m/s (' + str(round(int(data['currently']['windSpeed']) * 2.2369362920544, 2)) + ' mph)', inline=False)
-        embed.set_footer(text='Powered by Dark Sky and OpenStreetMap')
+        embed.set_footer('Powered by Dark Sky and OpenStreetMap')
         embed.timestamp = datetime.datetime.fromtimestamp(data['currently']['time'], tz=datetime.timezone.utc)
         await lynn.Response(embed=embed).send(ctx)
 

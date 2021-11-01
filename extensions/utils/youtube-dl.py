@@ -3,7 +3,7 @@ import os
 import hikari
 import lightbulb
 import lynn
-from utils import bytes2human
+import helpers
 
 if True: # TODO: config switch
     import yt_dlp
@@ -36,8 +36,10 @@ class YoutubeDL(lynn.Plugin):
                 file = tmp + info['id'] + '.' + info['ext']
                 size = os.path.getsize(file)
                 if size > 8000000:
-                    # TODO: temporary upload to fam.rip
-                    raise lynn.Error('Could not download.', 'Filesize = ' + bytes2human(size) + ' (under 8MiB expected).')
+                    if not helpers.is_vip(self.bot, ctx.author.id):
+                        raise lynn.Error('File over 8MB!', 'File is ' + helpers.bytes2human(size) + '.\nVIP is required to upload files over 8MB, ping the bot owner for more information.')
+
+                    # TODO: upload to fam.rip
 
                 hikari.File(file)
                 lynn.Response(attachment=file).send(ctx)

@@ -21,7 +21,8 @@ class Config:
         'status': 'online', # Bot's default status
         'activity': None, # Bot's default activity
         'lavalink_pass': "password", # Password for lavalink instance
-        'lavalink_host': '127.0.0.1' # Lavalink instance host, null to disable lavalink
+        'lavalink_host': '127.0.0.1', # Lavalink instance host, null to disable lavalink
+        'vips': [] # List of IDs (as string) to people who have VIP priviledges (uploading to custom site etc)
     }
 
     def __init__(self, path='config.json'):
