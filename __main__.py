@@ -8,9 +8,9 @@ import lightbulb
 import lynn
 
 
-def create_bot(token: str, prefix: str) -> lynn.Bot:
+def create_bot() -> lynn.Bot:
     """Create and return bot"""
-    bot = lynn.Bot(token=token, prefix=lightbulb.when_mentioned_or(prefix), intents=hikari.Intents.ALL)
+    bot = lynn.Bot(intents=hikari.Intents.ALL)
 
     for extension in [f.replace('.py', '').replace('/', '.').replace('\\', '.') for f in glob.glob('extensions/**/*.py', recursive=True)]:
         try:
@@ -26,4 +26,5 @@ if __name__ == '__main__':
         import uvloop
         uvloop.install()
 
-    create_bot(lynn.config.get('token'), lynn.config.get('prefix')).run(activity=lynn.config.get('activity'), status=lynn.config.get('status'))
+    bot = create_bot()
+    bot.run(activity=bot.config.get('activity'), status=bot.config.get('status'))

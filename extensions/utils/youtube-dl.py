@@ -21,7 +21,7 @@ class YoutubeDL(lynn.Plugin):
         ydl_opts = {
             'geo_bypass': True,
             'no_color': True,
-            #'quiet': True,
+            'quiet': False, # TODO: for debugging, use True in production
             'restrictfilenames': True
         }
 

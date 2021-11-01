@@ -57,8 +57,8 @@ class Music(lynn.Plugin):
         """Event that triggers when the hikari gateway is ready."""
 
         builder = (
-            lavasnek_rs.LavalinkBuilder(self.bot.get_me().id, lynn.config.get('token'))
-            .set_host(lynn.config.get('lavalink_host')).set_password(lynn.config.get('lavalink_pass'))
+            lavasnek_rs.LavalinkBuilder(self.bot.get_me().id, self.bot.config.get('token'))
+            .set_host(self.bot.config.get('lavalink_host')).set_password(self.bot.config.get('lavalink_pass'))
         )
 
         lava_client = await builder.build(EventHandler())
@@ -207,7 +207,7 @@ class Music(lynn.Plugin):
 
 
 def load(bot: lynn.Bot):
-    if lynn.config.get('lavalink_host'):
+    if bot.config.get('lavalink_host'):
         bot.add_plugin(Music(bot))
 
 def unload(bot: lynn.Bot):

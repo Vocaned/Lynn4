@@ -13,7 +13,9 @@ import lightbulb
 
 class Config:
     config_template = {
-        'token': None, # Bot's token
+        'secrets': {
+            'discord_token': None # Bot's token
+        },
         'prefix': '%', # Bot's prefix
         'typingindicator': False, # Should the bot trigger "is typing..." activity when processing commands
         'status': 'online', # Bot's default status
@@ -21,7 +23,6 @@ class Config:
         'lavalink_pass': "password", # Password for lavalink instance
         'lavalink_host': '127.0.0.1' # Lavalink instance host, null to disable lavalink
     }
-    required_values = ('token',)
 
     def __init__(self, path='config.json'):
         if not os.path.exists(path):
@@ -33,15 +34,10 @@ class Config:
         self.path = path
         self.dict = self.get_config()
 
-        for val in self.required_values:
-            if self.dict.get(val) is None:
-                logging.critical('Required value "%s" not set in %s. Please edit the file before running the bot again.', val, self.path)
-                sys.exit(1)
-
         for k, v in self.config_template.items():
             if k not in self.dict:
-                logging.warning('Required value "%s" not found in %s. The default value of "%s" was used. Please edit the file if necessary.', val, self.path, v)
-                self.set(val, v)
+                logging.warning('Required value "%s" not found in %s. The default value of "%s" was used. Please edit the file if necessary.', k, self.path, v)
+                self.set(k, v)
 
     def get_config(self) -> dict:
         if not os.path.exists('config.json'):
@@ -61,6 +57,11 @@ class Config:
     def get(self, key: str, default=None):
         return self.dict.get(key, default)
 
+    def get_secret(self, key: str):
+        secret = self.dict['secrets'].get(key, None)
+        if not secret:
+            raise Error('This command is currently disabled.', 'Secret key missing, please contact the bot owner.')
+        return secret
 
 class Plugin(lightbulb.Plugin):
     """Improved Plugin class"""
@@ -145,11 +146,14 @@ class Data:
 class Bot(lightbulb.Bot):
     """Improved Bot class"""
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.data = Data()
+        self.config = Config()
+        self.startup_time = time.time()
+
+        self.token = self.config.get_secret('discord_token')
+        self.prefix = lightbulb.when_mentioned_or(self.config.get('prefix'))
+
+        super().__init__(token=self.token, prefix=self.prefix, *args, **kwargs)
 
 ERROR_COLOR = 0xff4444
 EMBED_COLOR = 0x8f8f8f
-
-config = Config()
-startup_time = time.time()

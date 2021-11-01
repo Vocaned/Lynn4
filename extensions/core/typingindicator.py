@@ -4,7 +4,7 @@ import lynn
 global_bot = None
 
 async def handle(event: hikari.MessageCreateEvent) -> None:
-    if lynn.config.get('typingindicator'):
+    if global_bot.config.get('typingindicator'):
         async with global_bot.rest.trigger_typing(event.channel_id):
             await global_bot.handle(event)
     else:
