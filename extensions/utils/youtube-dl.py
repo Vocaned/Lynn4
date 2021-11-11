@@ -13,6 +13,7 @@ else:
 
 class YoutubeDL(lynn.Plugin):
 
+    # TODO: timeout commands after n seconds
     @lightbulb.cooldown(10, 1, lightbulb.UserBucket)
     @lightbulb.command(aliases=['youtube-dl', 'ytdl', 'dl', 'download'])
     async def youtubedl(self, ctx: lightbulb.Context, link, *, args=None):
@@ -45,8 +46,6 @@ class YoutubeDL(lynn.Plugin):
                 lynn.Response(attachment=file).send(ctx)
         except FileNotFoundError as e:
             raise yt_dlp.DownloadError('Could not download video.') from e
-
-
 
 
 

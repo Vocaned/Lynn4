@@ -22,7 +22,7 @@ class Errors(lynn.Plugin):
         if isinstance(error, errors.CommandInvocationError) or isinstance(error, errors.SlashCommandInvocationError):
             logging.error('Ignoring exception in %s', event.command)
             try:
-                with open('error.dat', 'w', encoding='utf-8') as f:
+                with open('data/error.dat', 'w', encoding='utf-8') as f:
                     f.write('\n'.join(traceback.format_exception(*event.exc_info)))
             except:
                 logging.error('Could not write error into error.dat')
@@ -104,7 +104,7 @@ class Errors(lynn.Plugin):
     @lightbulb.command()
     async def debug(self, ctx: lightbulb.Context):
         """Displays traceback from the last error"""
-        with open('error.dat', 'r', encoding='utf-8') as errors:
+        with open('data/error.dat', 'r', encoding='utf-8') as errors:
             error = errors.read()
             if not error:
                 await lynn.Response('No errors logged.').send(ctx)

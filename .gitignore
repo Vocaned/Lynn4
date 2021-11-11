@@ -1,5 +1,6 @@
 __pycache__
 config.json
 error.dat
+data
 lib/lavalink
 .vscode

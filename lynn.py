@@ -64,12 +64,6 @@ class Config:
             raise Error('This command is currently disabled.', 'Secret key missing, please contact the bot owner.')
         return secret
 
-class Plugin(lightbulb.Plugin):
-    """Improved Plugin class"""
-    def __init__(self, bot: lightbulb.Bot):
-        super().__init__()
-        self.bot = bot
-
 class Error(lightbulb.errors.CommandError):
     """Custom error message, raise to send an error embed."""
 
@@ -155,6 +149,12 @@ class Bot(lightbulb.Bot):
         self.prefix = lightbulb.when_mentioned_or(self.config.get('prefix'))
 
         super().__init__(token=self.token, prefix=self.prefix, *args, **kwargs)
+
+class Plugin(lightbulb.Plugin):
+    """Improved Plugin class"""
+    def __init__(self, bot: Bot):
+        super().__init__()
+        self.bot = bot
 
 ERROR_COLOR = 0xff4444
 EMBED_COLOR = 0x8f8f8f
