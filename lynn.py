@@ -1,12 +1,14 @@
+import importlib
 import json
 import logging
 import os
-import time
 import sys
+import time
 import typing
 
 import hikari
-import lavasnek_rs
+
+import errors
 
 
 class Config:
@@ -59,35 +61,62 @@ class Config:
     def get_secret(self, key: str):
         secret = self.dict['secrets'].get(key, None)
         if not secret:
-            raise Error('This command is currently disabled.', 'Secret key missing, please contact the bot owner.')
+            raise errors.LynnError('This command is currently disabled.', 'Secret key missing, please contact the bot owner.')
         return secret
-
-
-class Error(Exception):
-    """Custom error message, raise to send an error embed."""
-
-    def __init__(self, title: str = None, text: str = None):
-        self.title: str = title
-        """The error title."""
-        self.text: str = text
-        """The error text."""
-
-class Data:
-    """Global data shared across the entire bot."""
-    def __init__(self) -> None:
-        self.lavalink: lavasnek_rs.Lavalink = None # pylint: disable=no-member
 
 class Bot(hikari.GatewayBot):
     """Bot class"""
     def __init__(self, *args, **kwargs):
-        self.data = Data()
+        self.data = {}
         self.config = Config()
         self.startup_time = time.time()
 
+        self.extensions = {}
+
         self.token = self.config.get_secret('discord_token')
-        self.prefix = '%'
+        self.prefix = self.config.get('prefix')
 
         super().__init__(token=self.token, *args, **kwargs)
+
+    def load_extension(self, extension):
+        if extension in self.extensions:
+            raise errors.ExtensionAlreadyLoadedError(extension)
+
+        module = importlib.import_module(extension)
+
+        if not hasattr(module, "Extension"):
+            raise errors.ExtensionNoClass(extension)
+
+        ext = module.Extension(self)
+        self.extensions[extension] = ext
+
+    def unload_extension(self, extension):
+        if extension not in self.extensions:
+            raise errors.ExtensionNotLoaded(extension)
+
+        self.extensions[extension].unload()
+        del self.extensions[extension]
+        del sys.modules[extension]
+
+class Response:
+    def __init__(self, content:str, _dict:dict = None, embed:hikari.Embed = None) -> None:
+        """
+        @_dict: Return all relevant information the command returns here. The dictionary should not have a `content` or `embed` keys, as those will be overwritten.
+        """
+        self.dict = _dict if _dict else {}
+        self.dict['content'] = content
+        self.dict['embed'] = embed
+
+class Extension:
+    """Extension class"""
+    def __init__(self, bot: Bot):
+        self.bot = bot
+
+    def unload(self):
+        ...
+
+    async def execute(self, ctx: hikari.GuildMessageCreateEvent) -> Response:
+        ...
 
 ERROR_COLOR = 0xff4444
 EMBED_COLOR = 0x8f8f8f
