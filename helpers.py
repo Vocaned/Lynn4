@@ -2,6 +2,7 @@ import urllib
 import aiohttp
 import hikari
 import lynn
+import typing
 
 async def rest(url: str, method='GET', headers=None, data=None, auth=None, returns='json'):
     """TODO: Clean up this method just copy pasted from lynn3"""
@@ -31,6 +32,9 @@ async def rest(url: str, method='GET', headers=None, data=None, auth=None, retur
             if len(temp) == 1:
                 return temp[0]
             return temp
+
+def get_args(string: str, parts: int = -1, cmd_spaces: int = 0) -> typing.List[str]:
+    return string.split(' ', maxsplit=parts)[cmd_spaces+1:]
 
 def escape_url(url: str) -> str:
     return urllib.parse.quote(url)

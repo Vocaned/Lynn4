@@ -7,6 +7,7 @@ import time
 import typing
 
 import hikari
+from hikari import undefined
 
 import errors
 
@@ -73,6 +74,8 @@ class Bot(hikari.GatewayBot):
 
         self.extensions = {}
 
+        self.scripting = None
+
         self.token = self.config.get_secret('discord_token')
         self.prefix = self.config.get('prefix')
 
@@ -105,12 +108,23 @@ class Response:
         """
         self.dict = _dict if _dict else {}
         self.dict['content'] = content
-        self.dict['embed'] = embed
+        if embed:
+            self.dict['embed'] = embed
+
+    async def send_content(self, bot: Bot, channel:hikari.Snowflakeish) -> None:
+        await bot.rest.create_message(channel, self.dict.get('content'))
+
+    async def send_embed(self, bot: Bot, channel:hikari.Snowflakeish) -> None:
+        await bot.rest.create_message(channel, '', embed=self.dict.get('embed'))
+
+    async def send(self, bot: Bot, channel:hikari.Snowflakeish) -> None:
+        await bot.rest.create_message(channel, self.dict.get('content'), embed=self.dict.get('embed', undefined.UNDEFINED))
 
 class Extension:
     """Extension class"""
     def __init__(self, bot: Bot):
         self.bot = bot
+        self.commands = {}
 
     def unload(self):
         ...
