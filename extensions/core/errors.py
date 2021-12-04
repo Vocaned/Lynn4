@@ -17,7 +17,7 @@ class Errors(lynn.Plugin):
         or isinstance(error, errors.BotOnly) \
         or not event.command:
             return
-        
+
 
         if isinstance(error, errors.CommandInvocationError) or isinstance(error, errors.SlashCommandInvocationError):
             logging.error('Ignoring exception in %s', event.command)
@@ -98,7 +98,7 @@ class Errors(lynn.Plugin):
             errtype = f'Unknown error type {type(event.exception)} occured.'
 
         embed = hikari.Embed(color=lynn.ERROR_COLOR, title=errtype, description=errmsg)
-        await lynn.Response(embed=embed).send(event.context)
+        await lynn.Message(embed=embed).send_embed(event.context)
 
     @lightbulb.check(lightbulb.owner_only)
     @lightbulb.command()
@@ -107,9 +107,9 @@ class Errors(lynn.Plugin):
         with open('data/error.dat', 'r', encoding='utf-8') as errors:
             error = errors.read()
             if not error:
-                await lynn.Response('No errors logged.').send(ctx)
+                await lynn.Message('No errors logged.').send_content(ctx)
             else:
-                await lynn.Response(f'```{error}```').send(ctx)
+                await lynn.Message(f'```{error}```').send_content(ctx)
 
 def load(bot: lynn.Bot):
     bot.add_plugin(Errors(bot))

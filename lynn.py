@@ -1,9 +1,12 @@
+"""Abstraction layer for Discord APIs"""
+
 import json
 import logging
 import os
 import time
 import sys
 import typing
+from helpers import rest
 
 import hikari
 from hikari import undefined
@@ -73,66 +76,6 @@ class Error(lightbulb.errors.CommandError):
         self.text: str = text
         """The error text."""
 
-class Response:
-    """Better response handling"""
-
-    def __init__(self, content: undefined.UndefinedOr[typing.Any] = undefined.UNDEFINED,
-        *,
-        attachment: undefined.UndefinedOr[hikari.files.Resourceish] = undefined.UNDEFINED,
-        attachments: undefined.UndefinedOr[typing.Sequence[hikari.files.Resourceish]] = undefined.UNDEFINED,
-        component = undefined.UNDEFINED,
-        components = undefined.UNDEFINED,
-        embed: undefined.UndefinedOr[hikari.Embed] = undefined.UNDEFINED,
-        embeds: undefined.UndefinedOr[typing.Sequence[hikari.Embed]] = undefined.UNDEFINED,
-        nonce: undefined.UndefinedOr[str] = undefined.UNDEFINED,
-        tts: undefined.UndefinedOr[bool] = undefined.UNDEFINED,
-        reply: typing.Union[
-            undefined.UndefinedType, hikari.snowflakes.SnowflakeishOr[hikari.PartialMessage], bool
-        ] = undefined.UNDEFINED,
-        mentions_everyone: undefined.UndefinedOr[bool] = undefined.UNDEFINED,
-        mentions_reply: undefined.UndefinedOr[bool] = undefined.UNDEFINED,
-        user_mentions: undefined.UndefinedOr[
-            typing.Union[hikari.snowflakes.SnowflakeishSequence[hikari.PartialUser], bool]
-        ] = undefined.UNDEFINED,
-        role_mentions: undefined.UndefinedOr[
-            typing.Union[hikari.snowflakes.SnowflakeishSequence[hikari.PartialRole], bool]
-        ] = undefined.UNDEFINED,):
-        self.content = content
-        self.force_disable_reply = False
-        if reply is False:
-            self.force_disable_reply = True
-        self.data = {
-            'attachment': attachment, 'attachments': attachments, 'component': component, 'components': components,
-            'embed': embed, 'embeds': embeds, 'nonce': nonce, 'tts': tts, 'mentions_everyone': mentions_everyone,
-            'mentions_reply': mentions_reply, 'user_mentions': user_mentions, 'role_mentions': role_mentions
-        }
-
-    async def send_channel(self, channel: hikari.SnowflakeishOr[hikari.TextableChannel], author_id: typing.Union[str, int, hikari.Snowflakeish]) -> hikari.Message:
-        raise NotImplementedError()
-        """
-        try:
-            return await self.bot.rest.create_message(content=self.content, channel=channel, **self.data)
-        except hikari.BadRequestError as e:
-            try:
-                # pylint: disable=unsubscriptable-object
-                if len(e.errors['message_reference']['_errors']) == 1 and e.errors['message_reference']['_errors'][0]['code'] == 'REPLIES_UNKNOWN_MESSAGE':
-                    msg = self.content
-                    if author_id:
-                        if msg:
-                            msg.append(f'<@{author_id}>, {self.content}')
-                        else:
-                            msg = f'<@{author_id}>'
-                    return await self.bot.rest.create_message(content=msg, channel=channel, **self.data)
-            except KeyError:
-                pass
-            return None"""
-
-    async def send(self, ctx: lightbulb.Context) -> hikari.Message:
-        if not self.force_disable_reply:
-            self.data['reply'] = ctx.message
-        #return await self.send_channel(ctx.channel_id, ctx.author.id)
-        return await ctx.respond(content=self.content, **self.data)
-
 class Data:
     """Global data shared across the entire bot."""
     def __init__(self) -> None:
@@ -155,6 +98,48 @@ class Plugin(lightbulb.Plugin):
     def __init__(self, bot: Bot):
         super().__init__()
         self.bot = bot
+
+class Message:
+    def __init__(self, content: str = None, embed: hikari.Embed = None, image: typing.Union[hikari.File, str] = None, video: hikari.File = None) -> None:
+        self.content = content if content else ''
+        self.embed = embed if embed else undefined.UNDEFINED
+        self.image = image if image else undefined.UNDEFINED
+        self.video = video if video else undefined.UNDEFINED
+
+    async def send_content(self, context: lightbulb.Context) -> hikari.Message:
+        return await self._send_content(context.bot, context.channel_id)
+
+    async def _send_content(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
+        return await bot.rest.create_message(channel, self.content)
+
+    async def send_embed(self, context: lightbulb.Context) -> hikari.Message:
+        return await self._send_embed(context.bot, context.channel_id)
+
+    async def _send_embed(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
+        return await bot.rest.create_message(channel, '', embed=self.embed)
+
+    async def send_image(self, context: lightbulb.Context) -> hikari.Message:
+        return await self._send_image(context.bot, context.channel_id)
+
+    async def _send_image(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
+        # Image can be a link, so check type before sending
+        if isinstance(self.image, str):
+            self.image = hikari.files.Bytes(rest(self.image, returns='raw'))
+
+        return await bot.rest.create_message(channel, '', attachment=self.image)
+
+    async def send_video(self, context: lightbulb.Context) -> hikari.Message:
+        return await self._send_video(context.bot, context.channel_id)
+
+    async def _send_video(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
+        # TODO: Abstraction here to upload to a third party provider if video >8MB?
+        return await bot.rest.create_message(channel, '', attachment=self.video)
+
+    async def send_all(self, context: lightbulb.Context) -> hikari.Message:
+        return await self._send_all(context.bot, context.channel_id)
+
+    async def _send_all(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
+        return await bot.rest.create_message(channel, self.content, embed=self.embed, attachments=[self.image, self.video])
 
 ERROR_COLOR = 0xff4444
 EMBED_COLOR = 0x8f8f8f

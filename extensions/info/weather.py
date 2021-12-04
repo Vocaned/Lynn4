@@ -37,7 +37,8 @@ class Weather(lynn.Plugin):
             + 'Wind: ' + str(data['currently']['windSpeed']) + ' m/s (' + str(round(int(data['currently']['windSpeed']) * 2.2369362920544, 2)) + ' mph)', inline=False)
         embed.set_footer('Powered by Dark Sky and OpenStreetMap')
         embed.timestamp = datetime.datetime.fromtimestamp(data['currently']['time'], tz=datetime.timezone.utc)
-        await lynn.Response(embed=embed).send(ctx)
+        return lynn.Message(content=f"{geocoding[0]['display_name']}: {str(round(data['currently']['temperature']))}°C'",
+                            embed=embed, image=f"https://wttr.in/{geocoding[0]['lat']},{geocoding[0]['lon']}.png")
 
 def load(bot: lynn.Bot):
     bot.add_plugin(Weather(bot))

@@ -60,14 +60,14 @@ def td_format(td_object):
         if seconds > period_seconds:
             period_value , seconds = divmod(seconds, period_seconds)
             has_s = 's' if period_value > 1 else ''
-            strings.append('%s %s%s' % (period_value, period_name, has_s))
+            strings.append(f'{period_value} {period_name}{has_s}')
 
     if not strings:
         strings.append('less than a minute')
 
     return ', '.join(strings)
 
-def bytes2human(n):
+def bytes2human(n: int) -> str:
     # http://code.activestate.com/recipes/578019
     symbols = ('KiB', 'MiB', 'GiB', 'TiB', 'PiB')
     prefix = {}
@@ -76,5 +76,5 @@ def bytes2human(n):
     for s in reversed(symbols):
         if n >= prefix[s]:
             value = float(n) / prefix[s]
-            return '%.1f%s' % (value, s)
-    return "%sB" % n
+            return f'{value:.1f}{s}'
+    return f'{n}B'

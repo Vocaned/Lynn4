@@ -44,7 +44,7 @@ class Music(lynn.Plugin):
         try:
             connection_info = await self.bot.data.lavalink.join(ctx.guild_id, channel_id)
         except TimeoutError as e:
-            raise lynn.Error(title='Failed to join voice channel', 
+            raise lynn.Error(title='Failed to join voice channel',
                 text='I was unable to connect to the voice channel, maybe missing permissions? or some internal issue.'
             ) from e
 
@@ -71,7 +71,7 @@ class Music(lynn.Plugin):
         channel_id = await self._join(ctx)
 
         if channel_id:
-            await lynn.Response(f'Joined <#{channel_id}>').send(ctx)
+            await lynn.Message(f'Joined <#{channel_id}>').send(ctx)
 
     @lightbulb.check(lightbulb.guild_only)
     @lightbulb.command()
@@ -85,7 +85,7 @@ class Music(lynn.Plugin):
         await self.bot.data.lavalink.remove_guild_node(ctx.guild_id)
         await self.bot.data.lavalink.remove_guild_from_loops(ctx.guild_id)
 
-        await lynn.Response('Left voice channel.').send(ctx)
+        await lynn.Message('Left voice channel.').send(ctx)
 
     @lightbulb.check(lightbulb.guild_only)
     @lightbulb.command()
@@ -113,7 +113,7 @@ class Music(lynn.Plugin):
         except lavasnek_rs.NoSessionPresent as e:
             raise lynn.Error(title='Failed to play music', text=f'Use `{ctx.clean_prefix}join` first') from e
 
-        await lynn.Response(f'Added to queue: {query_information.tracks[0].info.title}').send(ctx)
+        await lynn.Message(f'Added to queue: {query_information.tracks[0].info.title}').send(ctx)
 
     @lightbulb.check(lightbulb.guild_only)
     @lightbulb.command()
@@ -132,14 +132,14 @@ class Music(lynn.Plugin):
         node = await self.bot.data.lavalink.get_guild_node(ctx.guild_id)
 
         if not skip:
-            await lynn.Response('Nothing to skip').send(ctx)
+            await lynn.Message('Nothing to skip').send(ctx)
         else:
             # If the queue is empty, the next track won't start playing (because there isn't any),
             # so we stop the player.
             if not node.queue and not node.now_playing:
                 await self.bot.data.lavalink.stop(ctx.guild_id)
 
-            await lynn.Response(f'Skipped: {skip.track.info.title}')
+            await lynn.Message(f'Skipped: {skip.track.info.title}')
             await ctx.message.add_reaction('\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}')
 
     @lightbulb.check(lightbulb.guild_only)
@@ -156,7 +156,7 @@ class Music(lynn.Plugin):
         """Resumes playing the current song."""
 
         await self.bot.data.lavalink.resume(ctx.guild_id)
-        await lynn.Response('Resumed player').send(ctx)
+        await lynn.Message('Resumed player').send(ctx)
         await ctx.message.add_reaction('\N{BLACK RIGHT-POINTING TRIANGLE WITH DOUBLE VERTICAL BAR}')
 
     @lightbulb.check(lightbulb.guild_only)
@@ -171,7 +171,7 @@ class Music(lynn.Plugin):
         embed = hikari.Embed(title='Now playing')
         embed.set_author(name=node.now_playing.track.info.author, url=node.now_playing.track.info.uri)
         embed.description = f'{node.now_playing.track.info.position} / {node.now_playing.track.info.length}'
-        await lynn.Response(embed=embed).send(ctx)
+        await lynn.Message(embed=embed).send(ctx)
 
     #@lightbulb.check(lightbulb.guild_only)
     #@lightbulb.command(aliases['q'])
@@ -197,13 +197,13 @@ class Music(lynn.Plugin):
         node = await self.bot.data.lavalink.get_guild_node(ctx.guild_id)
 
         if not args:
-            await lynn.Response(await node.get_data()).send(ctx)
+            await lynn.Message(await node.get_data()).send(ctx)
         else:
             if len(args) == 1:
                 await node.set_data({args[0]: args[0]})
             else:
                 await node.set_data({args[0]: args[1]})
-            await lynn.Response(await node.get_data()).send(ctx)
+            await lynn.Message(await node.get_data()).send(ctx)
 
 
 def load(bot: lynn.Bot):
