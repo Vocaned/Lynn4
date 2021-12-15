@@ -6,8 +6,8 @@ import os
 import time
 import sys
 import typing
-from helpers import rest
 
+from helpers import rest
 import hikari
 from hikari import undefined
 import lavasnek_rs
@@ -67,7 +67,7 @@ class Config:
             raise Error('This command is currently disabled.', 'Secret key missing, please contact the bot owner.')
         return secret
 
-class Error(lightbulb.errors.CommandError):
+class Error(lightbulb.errors.LightbulbError):
     """Custom error message, raise to send an error embed."""
 
     def __init__(self, title: str = None, text: str = None):
@@ -81,7 +81,7 @@ class Data:
     def __init__(self) -> None:
         self.lavalink: lavasnek_rs.Lavalink = None # pylint: disable=no-member
 
-class Bot(lightbulb.Bot):
+class Bot(lightbulb.BotApp):
     """Improved Bot class"""
     def __init__(self, *args, **kwargs):
         self.data = Data()
@@ -93,53 +93,50 @@ class Bot(lightbulb.Bot):
 
         super().__init__(token=self.token, prefix=self.prefix, *args, **kwargs)
 
-class Plugin(lightbulb.Plugin):
-    """Improved Plugin class"""
-    def __init__(self, bot: Bot):
-        super().__init__()
-        self.bot = bot
-
 class Message:
-    def __init__(self, content: str = None, embed: hikari.Embed = None, image: typing.Union[hikari.File, str] = None, video: hikari.File = None) -> None:
+    def __init__(self, content: str = None, embed: hikari.Embed = None, image: typing.Union[hikari.File, str] = None, files: typing.List[hikari.File] = None, output: str = 'all') -> None:
         self.content = content if content else ''
-        self.embed = embed if embed else undefined.UNDEFINED
-        self.image = image if image else undefined.UNDEFINED
-        self.video = video if video else undefined.UNDEFINED
+        self.embed = embed if embed else None
+        self.image = image if image else None
+        self.files = files if files else None
+        self.output = output
 
-    async def send_content(self, context: lightbulb.Context) -> hikari.Message:
-        return await self._send_content(context.bot, context.channel_id)
+    async def send(self, context: lightbulb.Context) -> hikari.Message:
+        return await self.send_channel(context.bot, context.channel_id)
 
-    async def _send_content(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
-        return await bot.rest.create_message(channel, self.content)
+    async def send_channel(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
+        content = self.content
 
-    async def send_embed(self, context: lightbulb.Context) -> hikari.Message:
-        return await self._send_embed(context.bot, context.channel_id)
+        # TODO: mix and match multiple outputs, same as helpers.rest but with a better system for both of them
+        out = {}
+        if self.output == 'all':
+            attachments = []
+            attachments.append(self.image if self.image else None)
+            attachments.append(self.files if self.files else None)
+            if not attachments:
+                attachments = undefined.UNDEFINED
 
-    async def _send_embed(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
-        return await bot.rest.create_message(channel, '', embed=self.embed)
+            out['embed'] = self.embed
+            out['attachments'] = attachments
+        elif self.output == 'embed':
+            content = ''
+            if self.embed:
+                out['embed'] = self.embed
+        elif self.output == 'image':
+            content = ''
+            if isinstance(self.image, str):
+                self.image = await rest(self.image, returns='raw')
+            if self.image:
+                out['attachments'] = [self.image,]
+        elif self.output == 'files':
+            content = ''
+            if self.files:
+                out['attachments'] = self.files
 
-    async def send_image(self, context: lightbulb.Context) -> hikari.Message:
-        return await self._send_image(context.bot, context.channel_id)
+        return await bot.rest.create_message(channel, content, **out)
 
-    async def _send_image(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
-        # Image can be a link, so check type before sending
-        if isinstance(self.image, str):
-            self.image = hikari.files.Bytes(rest(self.image, returns='raw'))
-
-        return await bot.rest.create_message(channel, '', attachment=self.image)
-
-    async def send_video(self, context: lightbulb.Context) -> hikari.Message:
-        return await self._send_video(context.bot, context.channel_id)
-
-    async def _send_video(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
-        # TODO: Abstraction here to upload to a third party provider if video >8MB?
-        return await bot.rest.create_message(channel, '', attachment=self.video)
-
-    async def send_all(self, context: lightbulb.Context) -> hikari.Message:
-        return await self._send_all(context.bot, context.channel_id)
-
-    async def _send_all(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
-        return await bot.rest.create_message(channel, self.content, embed=self.embed, attachments=[self.image, self.video])
+def get_plugin():
+    ...
 
 ERROR_COLOR = 0xff4444
 EMBED_COLOR = 0x8f8f8f

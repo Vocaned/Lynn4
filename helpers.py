@@ -1,7 +1,6 @@
 import urllib
 import aiohttp
 import hikari
-import lynn
 
 async def rest(url: str, method='GET', headers=None, data=None, auth=None, returns='json'):
     """TODO: Clean up this method just copy pasted from lynn3"""
@@ -35,7 +34,7 @@ async def rest(url: str, method='GET', headers=None, data=None, auth=None, retur
 def escape_url(url: str) -> str:
     return urllib.parse.quote(url)
 
-def is_vip(bot: lynn.Bot, user: hikari.Snowflakeish):
+def is_vip(bot, user: hikari.Snowflakeish):
     if isinstance(user) == hikari.PartialUser:
         user = user.id
 

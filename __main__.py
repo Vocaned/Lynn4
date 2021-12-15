@@ -14,8 +14,8 @@ def create_bot() -> lynn.Bot:
 
     for extension in [f.replace('.py', '').replace('/', '.').replace('\\', '.') for f in glob.glob('extensions/**/*.py', recursive=True)]:
         try:
-            bot.load_extension(extension)
-        except lightbulb.errors.ExtensionError as e:
+            bot.load_extensions(extension)
+        except lightbulb.errors.LightbulbError as e:
             logging.error('Failed to load extension: %s', e)
 
     return bot
