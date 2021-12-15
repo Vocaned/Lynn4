@@ -1,6 +1,7 @@
 import logging
 import traceback
 import os
+import aiohttp
 
 import hikari
 import lightbulb
@@ -82,7 +83,12 @@ async def handle_command_error(event: lightbulb.CommandErrorEvent):
 
     elif isinstance(error, errors.CommandInvocationError):
         errtype = f'An uncaught exception occured in `{event.context.command.name}`'
-        errmsg = f'{type(error.original).__name__}: {error.original}'
+
+        original = error.original
+        if isinstance(original, aiohttp.ClientOSError):
+            original = original.__cause__ # Get the original cause of errors related to sending a message
+
+        errmsg = f'{type(original).__name__}: {original}'
 
     elif isinstance(error, lynn.Error):
         errtype = error.title

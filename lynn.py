@@ -1,11 +1,14 @@
 """Abstraction layer for Discord APIs"""
 
+from fileinput import filename
 import json
 import logging
 import os
+import tempfile
 import time
 import sys
 import typing
+import io
 
 from helpers import rest
 import hikari
@@ -93,8 +96,32 @@ class Bot(lightbulb.BotApp):
 
         super().__init__(token=self.token, prefix=self.prefix, *args, **kwargs)
 
+class TemporaryFile:
+    def __init__(self, filename: str = None) -> None:
+        self.directory = tempfile.TemporaryDirectory()
+        self.filename = filename
+
+    def hikari_file(self):
+        filename = self.filename
+        if not filename:
+            files = os.listdir(self.directory.name)
+            if len(files) > 1:
+                raise Error('Temporary file has no known file name, and directory has more than 1 file.')
+            filename = files[0]
+        return hikari.File(os.path.join(self.directory.name, filename))
+
+    def close(self):
+        self.directory.cleanup()
+        del self
+
 class Message:
-    def __init__(self, content: str = None, embed: hikari.Embed = None, image: typing.Union[hikari.File, str] = None, files: typing.List[hikari.File] = None, output: str = 'all') -> None:
+    def __init__(self,
+            content: str = None,
+            embed: hikari.Embed = None,
+            image: typing.Union[hikari.File, str] = None,
+            files: typing.List[typing.Union[hikari.File, TemporaryFile]] = None,
+            output: str = 'all'
+        ) -> None:
         self.content = content if content else ''
         self.embed = embed if embed else None
         self.image = image if image else None
@@ -107,36 +134,33 @@ class Message:
     async def send_channel(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
         content = self.content
 
+        attachments = []
+        if self.image:
+            if isinstance(self.image, str):
+                self.image = await rest(self.image, returns='raw')
+            attachments.append(self.image)
+        if self.files:
+            newfiles = []
+            for f in self.files:
+                if isinstance(f, TemporaryFile):
+                    newfiles.append(f.hikari_file())
+                else:
+                    newfiles.append(f)
+
+            attachments += newfiles
+
         # TODO: mix and match multiple outputs, same as helpers.rest but with a better system for both of them
         out = {}
         if self.output == 'all':
-            attachments = []
-            attachments.append(self.image if self.image else None)
-            attachments.append(self.files if self.files else None)
-            if not attachments:
-                attachments = undefined.UNDEFINED
-
-            out['embed'] = self.embed
-            out['attachments'] = attachments
+            out['embed'] = self.embed if self.embed else undefined.UNDEFINED
+            out['attachments'] = attachments if attachments else undefined.UNDEFINED
         elif self.output == 'embed':
             content = ''
-            if self.embed:
-                out['embed'] = self.embed
-        elif self.output == 'image':
+            out['embed'] = self.embed if self.embed else undefined.UNDEFINED
+        elif self.output == 'files' or self.output == 'image':
             content = ''
-            if isinstance(self.image, str):
-                self.image = await rest(self.image, returns='raw')
-            if self.image:
-                out['attachments'] = [self.image,]
-        elif self.output == 'files':
-            content = ''
-            if self.files:
-                out['attachments'] = self.files
-
+            out['attachments'] = attachments if attachments else undefined.UNDEFINED
         return await bot.rest.create_message(channel, content, **out)
-
-def get_plugin():
-    ...
 
 ERROR_COLOR = 0xff4444
 EMBED_COLOR = 0x8f8f8f

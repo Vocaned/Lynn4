@@ -9,7 +9,7 @@ plugin = lightbulb.Plugin('weather')
 @lightbulb.add_checks(lightbulb.has_guild_permissions(hikari.Permissions.MANAGE_MESSAGES))
 @lightbulb.option('city', 'City to search weather in', modifier=lightbulb.commands.OptionModifier.CONSUME_REST)
 @plugin.command
-@lightbulb.command('weather', 'Is it raining today?')
+@lightbulb.command('weather', 'Is it raining today?', auto_defer=True)
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def weather(ctx: lightbulb.Context):
     geocoding = await rest('https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=en&q='+escape_url(ctx.options.city))

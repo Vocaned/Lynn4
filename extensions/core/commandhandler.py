@@ -12,13 +12,7 @@ ARG_SEP_REGEX = re.compile(r"(?:\s+|\n)")
 # Most of the file is duplicate code copy pasted from lightbulb
 
 async def handle(event: hikari.MessageCreateEvent) -> None:
-    if event.app.config.get('typingindicator'):
-        async with event.app.rest.trigger_typing(event.channel_id):
-            await _handle(event.app, event)
-    else:
-        await _handle(event.app, event)
-
-async def _handle(bot: lynn.Bot, event: hikari.MessageCreateEvent) -> None:
+    bot = event.app
     if bot.ignore_bots and not event.is_human:
         return
 
@@ -58,6 +52,10 @@ async def _handle(bot: lynn.Bot, event: hikari.MessageCreateEvent) -> None:
             if not isinstance(response, lynn.Message):
                 raise lynn.Error(f'Command responded with an invalid type <{type(response)}>', response)
             await response.send(context)
+
+            for f in response.files:
+                if isinstance(f, lynn.TemporaryFile):
+                    f.close() # Close potential temporary files after command is fully handled
         # CUSTOM CODE ENDS
     except Exception as exc:
         new_exc = exc

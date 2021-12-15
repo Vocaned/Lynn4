@@ -8,10 +8,10 @@ plugin = lightbulb.Plugin('shutdown')
 @plugin.command
 @lightbulb.command('shutdown', 'Goodbye!')
 @lightbulb.implements(lightbulb.PrefixCommand)
-async def shutdown_cmd(self, ctx: lightbulb.Context):
+async def shutdown_cmd(ctx: lightbulb.Context):
     await ctx.message.add_reaction('\N{WAVING HAND SIGN}')
     await lynn.Message(content='Goodbye!').send(ctx)
-    await self.bot.close()
+    await ctx.app.close()
 
 @lightbulb.add_checks(lightbulb.owner_only)
 @lightbulb.option('msg', 'Activity name')
