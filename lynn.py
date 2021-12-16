@@ -135,9 +135,9 @@ class Message:
         self.output = output
 
     async def send(self, context: lightbulb.Context) -> hikari.Message:
-        return await self.send_channel(context.bot, context.channel_id)
+        return await self.send_channel(context.bot, context.channel_id, reply=context.event.message_id)
 
-    async def send_channel(self, bot: Bot, channel: hikari.Snowflakeish) -> hikari.Message:
+    async def send_channel(self, bot: Bot, channel: hikari.Snowflakeish, reply=undefined.UNDEFINED) -> hikari.Message:
         content = self.content
 
         attachments = []
@@ -165,7 +165,17 @@ class Message:
         if self.output & MessageOutput.files == MessageOutput.files or self.output & MessageOutput.image == MessageOutput.image:
             content = ''
             out['attachments'] = attachments if attachments else undefined.UNDEFINED
-        return await bot.rest.create_message(channel, content, **out)
+
+        try:
+            return await bot.rest.create_message(channel, content, reply=reply, **out)
+        except hikari.BadRequestError as e:
+            errors = dict(e.errors)
+            if not errors or len(errors['message_reference']['_errors']) > 1 or errors['message_reference']['_errors'][0]['code'] != 'REPLIES_UNKNOWN_MESSAGE':
+                raise e
+
+            # Retry message without reply if REPLIES_UNKNOWN_MESSAGE
+            return await bot.rest.create_message(channel, content, **out)
+
 
 ERROR_COLOR = 0xff4444
 EMBED_COLOR = 0x8f8f8f

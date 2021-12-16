@@ -52,8 +52,8 @@ async def handle_command_error(event: lightbulb.CommandErrorEvent):
         errmsg = f'Usage: \n ```{event.context.prefix}{event.context.command.signature}```\n'
 
     elif isinstance(error, errors.CommandIsOnCooldown):
-        errtype = f'Command `{error.context.command.name}` is on cooldown'
-        errmsg = f'Try again in {int(error.retry_in)} seconds.'
+        errtype = f'Command `{event.context.command.name}` is on cooldown'
+        errmsg = f'Try again in {int(error.retry_after)} seconds.'
 
     elif isinstance(error, errors.OnlyInGuild):
         errtype = f'Command {event.context.command.name} can only be used in guilds'
@@ -72,11 +72,11 @@ async def handle_command_error(event: lightbulb.CommandErrorEvent):
 
     elif isinstance(error, errors.MissingRequiredPermission):
         errtype = f'You are missing a permission required to run command `{event.context.command.name}`'
-        errmsg = f'Missing permissions: ```{", ".join(error.permissions)}'
+        errmsg = f'Missing permissions: `{", ".join(str(p) for p in error.missing_perms)}`'
 
     elif isinstance(error, errors.BotMissingRequiredPermission):
         errtype = f'The bot is missing a permission required to run command `{event.context.command.name}`'
-        errmsg = f'Missing permissions: ```{", ".join(error.permissions)}'
+        errmsg = f'Missing permissions: `{", ".join(str(p) for p in error.missing_perms)}`'
 
     elif isinstance(error, errors.MissingRequiredAttachment):
         errtype = f'You are missing a required attachment to run command `{event.context.command.name}`'
