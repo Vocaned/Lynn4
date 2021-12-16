@@ -43,13 +43,13 @@ async def handle_command_error(event: lightbulb.CommandErrorEvent):
     errmsg = None
 
     if isinstance(error, errors.NotEnoughArguments):
-        errtype = f'Not enough arguments for command `{error.context.command.name}`'
-        errmsg = f'Usage: \n ```{event.context.clean_prefix}{lightbulb.help.get_command_signature(error.context.command)}```\n'
-        errmsg += f'Missing arguments: `{", ".join(error.missing_args)}`'
+        errtype = f'Not enough arguments for command `{event.context.command.name}`'
+        errmsg = f'Usage: \n ```{event.context.prefix}{event.context.command.signature}```\n'
+        errmsg += f'Missing arguments: `{", ".join(o.name for o in error.missing_options)}`'
 
     elif isinstance(error, errors.ConverterFailure):
         errtype = f'Type converter failed for command `{event.context.command.name}`'
-        errmsg = f'Usage: \n ```{event.context.clean_prefix}{lightbulb.help.get_command_signature(error.context.command)}```\n'
+        errmsg = f'Usage: \n ```{event.context.prefix}{event.context.command.signature}```\n'
 
     elif isinstance(error, errors.CommandIsOnCooldown):
         errtype = f'Command `{error.context.command.name}` is on cooldown'

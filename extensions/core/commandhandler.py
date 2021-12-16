@@ -53,9 +53,10 @@ async def handle(event: hikari.MessageCreateEvent) -> None:
                 raise lynn.Error(f'Command responded with an invalid type <{type(response)}>', response)
             await response.send(context)
 
-            for f in response.files:
-                if isinstance(f, lynn.TemporaryFile):
-                    f.close() # Close potential temporary files after command is fully handled
+            if response.files:
+                for f in response.files:
+                    if isinstance(f, lynn.TemporaryFile):
+                        f.close() # Close potential temporary files after command is fully handled
         # CUSTOM CODE ENDS
     except Exception as exc:
         new_exc = exc
