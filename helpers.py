@@ -1,32 +1,47 @@
 import urllib
 import aiohttp
 import hikari
+import typing
 
-async def rest(url: str, method='GET', headers=None, data=None, auth=None, returns='json'):
-    """TODO: Clean up this method just copy pasted from lynn3"""
+class RestOutput(int):
+    json = 1 << 0
+    status = 1 << 1
+    raw = 1 << 2
+    text = 1 << 3
+    object = 1 << 4
+
+class RestOptions:
+    def __init__(self, method='GET', headers=None, data=None, auth=None, returns: RestOutput = RestOutput.json) -> None:
+        self.method = method
+        self.headers = headers
+        self.data = data
+        self.auth = auth
+        self.returns = returns
+
+
+async def rest(url: str, opts: RestOptions = RestOptions()) -> typing.Union[object, typing.List[object]]:
     async with aiohttp.ClientSession() as s:
-        async with s.request(method, url, headers=headers, data=data, auth=auth) as r:
+        async with s.request(opts.method, url, headers=opts.headers, data=opts.data, auth=opts.auth) as r:
             temp = []
-            if isinstance(returns, str):
-                returns = (returns,)
-            for ret in returns:
-                if ret == 'json':
-                    try:
-                        j = await r.json()
-                    except aiohttp.ContentTypeError:
-                        j = None
-                    finally:
-                        temp.append(j)
-                elif ret == 'status':
-                    temp.append(r.status)
-                elif ret == 'raw':
-                    temp.append(await r.read())
-                elif ret == 'text':
-                    temp.append(await r.text())
-                elif ret == 'object':
-                    return r
-                else:
-                    raise NotImplementedError('Invalid return type ' + ret)
+
+            if opts.returns & RestOutput.json == RestOutput.json:
+                try:
+                    j = await r.json()
+                except aiohttp.ContentTypeError:
+                    j = None
+                finally:
+                    temp.append(j)
+            if opts.returns & RestOutput.status == RestOutput.status:
+                temp.append(r.status)
+            if opts.returns & RestOutput.raw == RestOutput.raw:
+                temp.append(await r.read())
+            if opts.returns & RestOutput.text == RestOutput.text:
+                temp.append(await r.text())
+            if opts.returns & RestOutput.object == RestOutput.object:
+                temp.append(r)
+
+            if not temp:
+                raise NotImplementedError('Invalid rest return type ' + opts.returns)
             if len(temp) == 1:
                 return temp[0]
             return temp

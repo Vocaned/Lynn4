@@ -40,7 +40,7 @@ async def weather(ctx: lightbulb.Context):
     embed.set_footer('Powered by Dark Sky and OpenStreetMap')
     embed.timestamp = datetime.datetime.fromtimestamp(data['currently']['time'], tz=datetime.timezone.utc)
     return lynn.Message(content=f"{geocoding[0]['display_name']}: {str(round(data['currently']['temperature']))}°C",
-                        embed=embed, image=f"https://wttr.in/{geocoding[0]['lat']},{geocoding[0]['lon']}.png", output='embed')
+                        embed=embed, image=f"https://wttr.in/{geocoding[0]['lat']},{geocoding[0]['lon']}.png", output=lynn.MessageOutput.embed)
 
 
 def load(bot: lynn.Bot):

@@ -10,7 +10,7 @@ import sys
 import typing
 import io
 
-from helpers import rest
+from helpers import rest, RestOptions, RestOutput
 import hikari
 from hikari import undefined
 import lavasnek_rs
@@ -114,13 +114,19 @@ class TemporaryFile:
         self.directory.cleanup()
         del self
 
+class MessageOutput(int):
+    all = 1 << 0
+    embed = 1 << 1
+    image = 1 << 2
+    files = 1 << 3
+
 class Message:
     def __init__(self,
             content: str = None,
             embed: hikari.Embed = None,
             image: typing.Union[hikari.File, str] = None,
             files: typing.List[typing.Union[hikari.File, TemporaryFile]] = None,
-            output: str = 'all'
+            output: MessageOutput = MessageOutput.all
         ) -> None:
         self.content = content if content else ''
         self.embed = embed if embed else None
@@ -137,7 +143,7 @@ class Message:
         attachments = []
         if self.image:
             if isinstance(self.image, str):
-                self.image = await rest(self.image, returns='raw')
+                self.image = await rest(self.image, RestOptions(returns=RestOutput.raw))
             attachments.append(self.image)
         if self.files:
             newfiles = []
@@ -149,15 +155,14 @@ class Message:
 
             attachments += newfiles
 
-        # TODO: mix and match multiple outputs, same as helpers.rest but with a better system for both of them
         out = {}
-        if self.output == 'all':
+        if self.output & MessageOutput.all == MessageOutput.all:
             out['embed'] = self.embed if self.embed else undefined.UNDEFINED
             out['attachments'] = attachments if attachments else undefined.UNDEFINED
-        elif self.output == 'embed':
+        if self.output & MessageOutput.embed == MessageOutput.embed:
             content = ''
             out['embed'] = self.embed if self.embed else undefined.UNDEFINED
-        elif self.output == 'files' or self.output == 'image':
+        if self.output & MessageOutput.files == MessageOutput.files or self.output & MessageOutput.image == MessageOutput.image:
             content = ''
             out['attachments'] = attachments if attachments else undefined.UNDEFINED
         return await bot.rest.create_message(channel, content, **out)
