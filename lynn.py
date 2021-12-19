@@ -10,7 +10,7 @@ import sys
 import typing
 import io
 
-from helpers import rest, RestOptions, RestOutput
+from helpers import rest, RestOptions
 import hikari
 from hikari import undefined
 import lavasnek_rs
@@ -124,8 +124,8 @@ class Message:
     def __init__(self,
             content: str = None,
             embed: hikari.Embed = None,
-            image: typing.Union[hikari.File, str] = None,
-            files: typing.List[typing.Union[hikari.File, TemporaryFile]] = None,
+            image: typing.Union[hikari.File, hikari.Resourceish, str] = None,
+            files: typing.List[typing.Union[hikari.File, hikari.Resourceish, TemporaryFile]] = None,
             output: MessageOutput = MessageOutput.all
         ) -> None:
         self.content = content if content else ''
@@ -143,7 +143,7 @@ class Message:
         attachments = []
         if self.image:
             if isinstance(self.image, str):
-                self.image = await rest(self.image, RestOptions(returns=RestOutput.raw))
+                self.image = await rest(self.image, RestOptions(returns='raw'))
             attachments.append(self.image)
         if self.files:
             newfiles = []

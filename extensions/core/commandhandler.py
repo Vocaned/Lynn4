@@ -27,6 +27,9 @@ async def invoke(context) -> None:
             for f in response.files:
                 if isinstance(f, lynn.TemporaryFile):
                     f.close() # Close potential temporary files after command is fully handled
+    else:
+        if response is not False:
+            raise lynn.Error(f'Command `{context.command.name}` did not return any data.')
 
 
 def load(bot: lynn.Bot):

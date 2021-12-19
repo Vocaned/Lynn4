@@ -318,7 +318,6 @@ def eval_rpn(tokens):
     else:
         return stack[0]
 
-@lightbulb.add_checks(lightbulb.has_guild_permissions(hikari.Permissions.MANAGE_MESSAGES))
 @lightbulb.option('expr', 'Expression', modifier=lightbulb.commands.OptionModifier.CONSUME_REST)
 @plugin.command
 @lightbulb.command('calculator', 'combines numbers into other numbers', aliases=['math', 'calc'])
@@ -328,7 +327,7 @@ async def calculator(ctx: lightbulb.Context):
     expr = implicit_multiplication(expr)
     expr = to_rpn(expr)
     expr = eval_rpn(expr)
-    return lynn.Message('> {}'.format(expr))
+    return lynn.Message('> {} = `{}`'.format(ctx.options.expr, expr))
 
 
 def load(bot: lynn.Bot):

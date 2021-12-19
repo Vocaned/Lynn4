@@ -108,9 +108,9 @@ async def debug(ctx: lightbulb.Context):
     with open('data/error.dat', 'r', encoding='utf-8') as errors:
         error = errors.read()
         if not error:
-            await lynn.Message('No errors logged.').send(ctx)
+            return lynn.Message('No errors logged.')
         else:
-            await lynn.Message(f'```{error}```').send(ctx)
+            return lynn.Message(f'```{error}```')
 
 def load(bot: lynn.Bot):
     bot.add_plugin(plugin)

@@ -18,8 +18,8 @@ async def ping_cmd(ctx: lightbulb.Context):
 
     embed.add_field('Current Time', f'\N{CLOCK FACE THREE OCLOCK} {datetime.now().isoformat()}')
     embed.add_field('Uptime',
-                    f'\N{DESKTOP COMPUTER} **System**: {helpers.td_format(datetime.now() - datetime.fromtimestamp(psutil.boot_time()))}\n' +
-                    f'\N{ROBOT FACE} **Bot**: {helpers.td_format(datetime.now() - datetime.fromtimestamp(ctx.app.startup_time))}')
+                    f'\N{DESKTOP COMPUTER} **System**: {helpers.formatting.td_format(datetime.now() - datetime.fromtimestamp(psutil.boot_time()))}\n' +
+                    f'\N{ROBOT FACE} **Bot**: {helpers.formatting.td_format(datetime.now() - datetime.fromtimestamp(ctx.app.startup_time))}')
 
     temperatures = []
     temps = psutil.sensors_temperatures()
@@ -29,7 +29,7 @@ async def ping_cmd(ctx: lightbulb.Context):
     embed.add_field('Temperature', '\n'.join(temperatures))
 
     mem = psutil.virtual_memory()
-    embed.add_field('Memory', f'\N{FLOPPY DISK} {helpers.bytes2human(mem.used)} used, {helpers.bytes2human(mem.total)} total')
+    embed.add_field('Memory', f'\N{FLOPPY DISK} {helpers.formatting.bytes2human(mem.used)} used, {helpers.formatting.bytes2human(mem.total)} total')
 
     cpu = psutil.cpu_times_percent(interval=1, percpu=False)
     embed.add_field('CPU', f'\N{LEVEL SLIDER} {round(100-cpu.idle, 2)}%')

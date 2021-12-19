@@ -2,8 +2,8 @@ import tempfile
 import os
 import hikari
 import lightbulb
-import lynn
 import helpers
+import lynn
 
 try:
     import yt_dlp as yt_dl
@@ -42,7 +42,7 @@ async def youtubedl(ctx: lightbulb.Context):
         if size > 8000000:
             if not helpers.is_vip(ctx.app, ctx.author.id):
                 tmp.close()
-                raise lynn.Error('File over 8MB!', 'File is ' + helpers.bytes2human(size) + '.\nVIP is required to upload files over 8MB.')
+                raise lynn.Error('File over 8MB!', 'File is ' + helpers.formatting.bytes2human(size) + '.\nVIP is required to upload files over 8MB.')
 
             # TODO: upload to fam.rip
             tmp.close()

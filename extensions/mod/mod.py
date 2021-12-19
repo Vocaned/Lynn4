@@ -15,8 +15,8 @@ async def echo(ctx: lightbulb.Context) -> None:
 
 @lightbulb.add_checks(lightbulb.has_guild_permissions(hikari.Permissions.BAN_MEMBERS))
 @lightbulb.add_checks(lightbulb.bot_has_guild_permissions(hikari.Permissions.BAN_MEMBERS))
-@lightbulb.option('member', 'Member to ban', hikari.Member)
 @lightbulb.option('reason', 'Reason for the ban', default='', modifier=lightbulb.commands.base.OptionModifier.CONSUME_REST)
+@lightbulb.option('member', 'Member to ban', hikari.Member)
 @plugin.command
 @lightbulb.command('ban', 'Bans a member')
 @lightbulb.implements(lightbulb.PrefixCommand)
@@ -26,8 +26,8 @@ async def ban(ctx: lightbulb.Context) -> None:
 
 @lightbulb.add_checks(lightbulb.has_guild_permissions(hikari.Permissions.BAN_MEMBERS))
 @lightbulb.add_checks(lightbulb.bot_has_guild_permissions(hikari.Permissions.BAN_MEMBERS))
-@lightbulb.option('user', 'User to hackban', hikari.Snowflake)
 @lightbulb.option('reason', 'Reason for the ban', default='', modifier=lightbulb.commands.base.OptionModifier.CONSUME_REST)
+@lightbulb.option('user', 'User to hackban', hikari.Snowflake)
 @plugin.command
 @lightbulb.command('hackban', 'Bans an user by their ID')
 @lightbulb.implements(lightbulb.PrefixCommand)
@@ -49,8 +49,8 @@ async def unban(ctx: lightbulb.Context) -> None:
 
 @lightbulb.add_checks(lightbulb.has_guild_permissions(hikari.Permissions.KICK_MEMBERS))
 @lightbulb.add_checks(lightbulb.bot_has_guild_permissions(hikari.Permissions.KICK_MEMBERS))
-@lightbulb.option('member', 'Member to kick', hikari.Member)
 @lightbulb.option('reason', 'Reason for the kick', default='', modifier=lightbulb.commands.base.OptionModifier.CONSUME_REST)
+@lightbulb.option('member', 'Member to kick', hikari.Member)
 @plugin.command
 @lightbulb.command('kick', 'Kicks a member')
 @lightbulb.implements(lightbulb.PrefixCommand)
@@ -60,8 +60,8 @@ async def kick(ctx: lightbulb.Context) -> None:
 
 @lightbulb.add_checks(lightbulb.has_guild_permissions(hikari.Permissions.MANAGE_NICKNAMES))
 @lightbulb.add_checks(lightbulb.bot_has_guild_permissions(hikari.Permissions.MANAGE_NICKNAMES))
-@lightbulb.option('member', 'Member to kick', hikari.Member)
 @lightbulb.option('name', 'New nickname', modifier=lightbulb.commands.base.OptionModifier.CONSUME_REST)
+@lightbulb.option('member', 'Member to kick', hikari.Member)
 @plugin.command
 @lightbulb.command('nick', 'Changes a member\'s nickname', aliases=['nickname'])
 @lightbulb.implements(lightbulb.PrefixCommand)
@@ -71,8 +71,8 @@ async def nick(ctx: lightbulb.Context) -> None:
 
 @lightbulb.add_checks(lightbulb.has_guild_permissions(hikari.Permissions.MANAGE_ROLES))
 @lightbulb.add_checks(lightbulb.bot_has_guild_permissions(hikari.Permissions.MANAGE_ROLES))
-@lightbulb.option('member', 'Member to change role on', hikari.Member)
 @lightbulb.option('role', 'Role to change', hikari.Role, modifier=lightbulb.commands.base.OptionModifier.CONSUME_REST)
+@lightbulb.option('member', 'Member to change role on', hikari.Member)
 @plugin.command
 @lightbulb.command('role', 'Changes a member\'s role')
 @lightbulb.implements(lightbulb.PrefixCommand)
@@ -100,8 +100,8 @@ async def invite(ctx: lightbulb.Context) -> None:
 
 @lightbulb.add_checks(lightbulb.has_guild_permissions(hikari.Permissions.MANAGE_MESSAGES))
 @lightbulb.add_checks(lightbulb.bot_has_guild_permissions(hikari.Permissions.MANAGE_MESSAGES))
-@lightbulb.option('amount', 'Number of messages to purge (max 100)', int)
 @lightbulb.option('member', 'Member whose messages should be purged', hikari.Member, required=False)
+@lightbulb.option('amount', 'Number of messages to purge (max 100)', int)
 @plugin.command
 @lightbulb.command('purge', 'Mass remove messages in the channel', aliases=['prune'])
 @lightbulb.implements(lightbulb.PrefixCommand)
