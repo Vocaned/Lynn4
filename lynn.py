@@ -122,10 +122,37 @@ class TemporaryFile:
         del self
 
 class MessageOutput(int):
-    all = 1 << 0
+    content = 1 << 0
     embed = 1 << 1
     image = 1 << 2
     files = 1 << 3
+    all = embed | image | files | content
+
+def typeparser(last_option: str, default: MessageOutput, implements: MessageOutput) -> typing.Tuple[str, MessageOutput]:
+    last_word = last_option.split()[-1]
+    if last_word[0] == '>':
+        last_option = ' '.join(last_option.split()[:-1])
+
+        if last_word == '>text':
+            if implements & MessageOutput.content == MessageOutput.content:
+                raise Error('This command doesn\'t support the output type ' + last_word)
+            default = MessageOutput.content
+        elif last_word == '>embed':
+            if implements & MessageOutput.content == MessageOutput.embed:
+                raise Error('This command doesn\'t support the output type ' + last_word)
+            default = MessageOutput.embed
+        elif last_word == '>image':
+            if implements & MessageOutput.content == MessageOutput.image:
+                raise Error('This command doesn\'t support the output type ' + last_word)
+            default = MessageOutput.image
+        elif last_word == '>files':
+            if implements & MessageOutput.content == MessageOutput.files:
+                raise Error('This command doesn\'t support the output type ' + last_word)
+            default = MessageOutput.files
+        else:
+            raise Error('Unknown output type ' + last_word)
+
+    return (last_option, default)
 
 class Message:
     def __init__(self,
@@ -163,15 +190,14 @@ class Message:
             attachments += newfiles
 
         out = {}
-        if self.output & MessageOutput.all == MessageOutput.all:
-            out['embed'] = self.embed if self.embed else undefined.UNDEFINED
-            out['attachments'] = attachments if attachments else undefined.UNDEFINED
         if self.output & MessageOutput.embed == MessageOutput.embed:
             content = ''
             out['embed'] = self.embed if self.embed else undefined.UNDEFINED
         if self.output & MessageOutput.files == MessageOutput.files or self.output & MessageOutput.image == MessageOutput.image:
             content = ''
             out['attachments'] = attachments if attachments else undefined.UNDEFINED
+        if self.output & MessageOutput.content == MessageOutput.content:
+            content = self.content
 
         try:
             return await bot.rest.create_message(channel, content, reply=reply, **out)

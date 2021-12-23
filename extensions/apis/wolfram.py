@@ -11,8 +11,8 @@ plugin = lightbulb.Plugin('apis', 'Commands that get information from web APIs')
 @lightbulb.command('wolframalpha', 'Queries WolframAlpha', aliases=['wa', 'wolfram'], auto_defer=True)
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def wolframalpha(ctx: lightbulb.Context):
-    if ctx.options.query.split()[-1] == '>text':
-        query = ' '.join(ctx.options.query.split()[:-1])
+    query, out = lynn.typeparser(ctx.options.query, lynn.MessageOutput.image, lynn.MessageOutput.image | lynn.MessageOutput.content)
+    if out == lynn.MessageOutput.content:
         data, status = await helpers.rest(
             f"http://api.wolframalpha.com/v1/result?appid={ctx.app.config.get_secret('wolframalpha')}&i={helpers.escape_url(query)}",
             opts=helpers.RestOptions(returns=('raw', 'status'))
@@ -35,9 +35,9 @@ async def wolframalpha(ctx: lightbulb.Context):
     if len(data) == 0:
         raise lynn.Error('WolframAlpha did not return any data.')
 
-    if ctx.options.query.split()[-1] == '>text':
-        return lynn.Message(data.decode('utf-8'))
-    return lynn.Message(image=data, output=lynn.MessageOutput.image)
+    if out == lynn.MessageOutput.content:
+        return lynn.Message(data.decode('utf-8'), output=out)
+    return lynn.Message(image=data, output=out)
 
 
 def load(bot: lynn.Bot):
