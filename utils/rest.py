@@ -3,6 +3,8 @@ import urllib
 import aiohttp
 import typing
 
+import lightbulb
+
 class OpenGraphParser(html.parser.HTMLParser):
     def __init__(self, *, convert_charrefs: bool = ...) -> None:
         super().__init__(convert_charrefs=convert_charrefs)
@@ -33,6 +35,9 @@ async def rest(url: str, opts: RestOptions = RestOptions()) -> typing.Union[obje
         async with s.request(opts.method, url, headers=opts.headers, data=opts.data, auth=opts.auth) as r:
             temp = []
 
+            if isinstance(opts.returns, str):
+                opts.returns = (opts.returns, )
+
             for out in opts.returns:
                 if out == 'json':
                     try:
@@ -49,9 +54,11 @@ async def rest(url: str, opts: RestOptions = RestOptions()) -> typing.Union[obje
                     temp.append(await r.text())
                 elif out == 'object':
                     temp.append(r)
-
+                else:
+                    raise NotImplementedError('Invalid rest return type ' + out)
             if not temp:
-                raise NotImplementedError('Invalid rest return type ' + opts.returns)
+                print(await r.read())
+                raise NotImplementedError('REST didn\'t return any data.')
             if len(temp) == 1:
                 return temp[0]
             return temp

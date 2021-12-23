@@ -1,11 +1,12 @@
 import datetime
 import time
-import requests
+import aiohttp
 import hikari
 import lightbulb
 import feedparser
 import lynn
 import helpers
+from utils.rest import RestOptions
 
 plugin = lightbulb.Plugin('newsapis')
 
@@ -39,18 +40,21 @@ async def news(ctx: lightbulb.Context):
 
         entry = resp['items'][page_index]
 
-        article = requests.get(entry['link']).text
+        article = await helpers.rest(entry['link'], RestOptions(returns='text'))
         ogparser = helpers.OpenGraphParser()
         ogparser.feed(article)
 
         if not ogparser.tags: # Article didn't have any OpenGraph meta tags. Probably blocked in EU.
             del resp['items'][page_index] # Delete result and try the next one
-            return await build_embed(page_index+1)
+            return await build_embed(page_index)
 
         embed = hikari.Embed(color=0xf5c518)
         embed.url = entry['link']
-        embed.set_footer(entry['source']['title'])
+        embed.set_author(name=entry['source']['title'])
         embed.timestamp = datetime.datetime.fromtimestamp(time.mktime(entry.published_parsed)).astimezone()
+
+        if page_index == len(resp['items']):
+            embed.set_footer('(last page reached)')
 
         if 'og:title' in ogparser.tags:
             embed.title = ogparser.tags['og:title']

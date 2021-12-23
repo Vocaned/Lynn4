@@ -1,4 +1,6 @@
 import hikari
+import base64
+import uuid
 
 from utils.navigation import DynamicButtonNavigator
 from utils.rest import OpenGraphParser, RestOptions, rest, escape_url
@@ -12,3 +14,6 @@ def is_vip(bot, user: hikari.Snowflakeish):
     if not vips:
         return False
     return str(user) in vips
+
+def random_name(length: int = 8):
+    return base64.urlsafe_b64encode(uuid.uuid4().bytes).decode("ascii")[:length]

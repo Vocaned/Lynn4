@@ -101,14 +101,21 @@ class TemporaryFile:
         self.directory = tempfile.TemporaryDirectory()
         self.filename = filename
 
+    def get_path(self):
+        return os.path.join(self.directory.name, self.get_filename())
+
     def hikari_file(self):
-        filename = self.filename
-        if not filename:
+        return hikari.File(self.get_path())
+
+    def get_filename(self):
+        if not self.filename:
             files = os.listdir(self.directory.name)
+            if len(files) == 0:
+                raise Error('Temporary file has no known file name, and there are no files in the directory.')
             if len(files) > 1:
                 raise Error('Temporary file has no known file name, and directory has more than 1 file.')
-            filename = files[0]
-        return hikari.File(os.path.join(self.directory.name, filename))
+            self.filename = files[0]
+        return self.filename
 
     def close(self):
         self.directory.cleanup()
