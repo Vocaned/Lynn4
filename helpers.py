@@ -9,7 +9,7 @@ from utils.shell import check_output
 from utils import formatting
 
 def is_vip(bot, user: hikari.Snowflakeish):
-    if isinstance(user) == hikari.PartialUser:
+    if isinstance(user, hikari.PartialUser):
         user = user.id
 
     vips = bot.config.get('vips')
