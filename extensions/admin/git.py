@@ -24,12 +24,12 @@ async def reset(ctx: lightbulb.Context):
 async def pull(ctx: lightbulb.Context):
     msg = await helpers.check_output(['git', 'pull'])
     msg += '\n'
-    msg += await helpers.check_output(['git', 'log', '@{1}..', '--format="%h %an | %s %b %N"'])
+    msg += await helpers.check_output(['git', 'log', '@{1}..', '--format=%h %an | %s %b %N'])
     return lynn.Message(helpers.formatting.codeblock(msg))
 
 @lightbulb.add_checks(lightbulb.owner_only)
 @git.child
-@lightbulb.option('count', 'How many latest commits to show', int, default=1)
+@lightbulb.option('count', 'How many latest commits to show', int, default=3)
 @lightbulb.command('log', 'Show a log of last commits', aliases=['show'])
 @lightbulb.implements(lightbulb.PrefixSubCommand)
 async def log(ctx: lightbulb.Context):
