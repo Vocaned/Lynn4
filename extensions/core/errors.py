@@ -90,6 +90,10 @@ async def handle_command_error(event: lightbulb.CommandErrorEvent):
         errtype = error.title
         errmsg = error.text
 
+    elif isinstance(error, lynn.IncorrectUsageError):
+        errtype = error.title
+        errmsg = f'Usage: \n ```{event.context.prefix}{event.context.command.signature}```\n'
+
     else:
         errtype = f'Unknown error type {type(error)} occured.'
 

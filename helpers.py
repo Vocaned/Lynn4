@@ -19,3 +19,9 @@ def is_vip(bot, user: hikari.Snowflakeish):
 
 def random_name(length: int = 8):
     return base64.urlsafe_b64encode(uuid.uuid4().bytes).decode("ascii")[:length]
+
+def codeblock(string: str, highlighting: typing.Optional[str] = None):
+    tmp = '```' + highlighting if highlighting else ''
+    tmp += '\n' + string.replace('```', '``\U0000200B`') # Add zero width space if string tries to escape codeblock
+    tmp += '\n```'
+    return tmp

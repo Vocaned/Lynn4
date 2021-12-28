@@ -81,6 +81,11 @@ class Error(lightbulb.errors.LightbulbError):
         self.text: str = text
         """The error text."""
 
+class IncorrectUsageError(Error):
+    """Custom error message, raise to send an error embed with usage text."""
+    def __init__(self, title: str = None):
+        super().__init__(title=title, text=None)
+
 class Data:
     """Global data shared across the entire bot."""
     def __init__(self) -> None:
