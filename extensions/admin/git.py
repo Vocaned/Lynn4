@@ -15,7 +15,7 @@ async def git(ctx: lightbulb.Context):
 @lightbulb.implements(lightbulb.PrefixSubCommand)
 async def reset(ctx: lightbulb.Context):
     msg = await helpers.check_output(['git', 'reset', '--hard', 'origin/master'])
-    return lynn.Message(helpers.codeblock(msg))
+    return lynn.Message(helpers.formatting.codeblock(msg))
 
 @lightbulb.add_checks(lightbulb.owner_only)
 @git.child
@@ -24,8 +24,8 @@ async def reset(ctx: lightbulb.Context):
 async def pull(ctx: lightbulb.Context):
     msg = await helpers.check_output(['git', 'pull'])
     msg += '\n'
-    msg += await helpers.check_output(['git', 'log', '@{1}..', '--format="%h %an | %B%n%N"'])
-    return lynn.Message(helpers.codeblock(msg))
+    msg += await helpers.check_output(['git', 'log', '@{1}..', '--format="%h %an | %s %b %N"'])
+    return lynn.Message(helpers.formatting.codeblock(msg))
 
 @lightbulb.add_checks(lightbulb.owner_only)
 @git.child
@@ -34,7 +34,7 @@ async def pull(ctx: lightbulb.Context):
 @lightbulb.implements(lightbulb.PrefixSubCommand)
 async def log(ctx: lightbulb.Context):
     msg = await helpers.check_output(['git', 'log', f'-{ctx.options.count}'])
-    return lynn.Message(helpers.codeblock(msg))
+    return lynn.Message(helpers.formatting.codeblock(msg))
 
 
 PLUGIN_NAME = 'admin'

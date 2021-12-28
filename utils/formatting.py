@@ -1,3 +1,5 @@
+import typing
+
 def td_format(td_object):
     # https://stackoverflow.com/a/13756038
     seconds = int(td_object.total_seconds())
@@ -32,3 +34,9 @@ def bytes2human(n: int) -> str:
             value = float(n) / prefix[s]
             return f'{value:.1f}{s}'
     return f'{n}B'
+
+def codeblock(string: str, highlighting: typing.Optional[str] = None):
+    tmp = '```' + (highlighting if highlighting else '')
+    tmp += '\n' + string.replace('```', '``\U0000200B`') # Add zero width space if string tries to escape codeblock
+    tmp += '\n```'
+    return tmp
