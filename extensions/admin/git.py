@@ -12,6 +12,7 @@ async def git(ctx: lightbulb.Context):
 @lightbulb.add_checks(lightbulb.owner_only)
 @git.child
 @lightbulb.command('reset', 'Reset the git branch', aliases=['fuck'])
+@lightbulb.implements(lightbulb.PrefixSubCommand)
 async def reset(ctx: lightbulb.Context):
     msg = await helpers.check_output(['git', 'reset', '--hard', 'origin/master'])
     return lynn.Message(helpers.codeblock(msg))
@@ -19,6 +20,7 @@ async def reset(ctx: lightbulb.Context):
 @lightbulb.add_checks(lightbulb.owner_only)
 @git.child
 @lightbulb.command('pull', 'Pull from git origin')
+@lightbulb.implements(lightbulb.PrefixSubCommand)
 async def pull(ctx: lightbulb.Context):
     msg = await helpers.check_output(['git', 'pull'])
     msg += '\n'
@@ -29,6 +31,7 @@ async def pull(ctx: lightbulb.Context):
 @git.child
 @lightbulb.option('count', 'How many latest commits to show', int, default=1)
 @lightbulb.command('log', 'Show a log of last commits', aliases=['show'])
+@lightbulb.implements(lightbulb.PrefixSubCommand)
 async def log(ctx: lightbulb.Context):
     msg = await helpers.check_output(['git', 'log', f'-{ctx.options.count}'])
     return lynn.Message(helpers.codeblock(msg))
