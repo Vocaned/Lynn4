@@ -2,10 +2,10 @@ import hikari
 import base64
 import uuid
 import typing
-from lynn import Message
 
 from utils.navigation import DynamicButtonNavigator
 from utils.rest import OpenGraphParser, RestOptions, rest, escape_url
+from utils.shell import check_output
 from utils import formatting
 
 def is_vip(bot, user: hikari.Snowflakeish):
