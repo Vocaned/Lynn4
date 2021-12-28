@@ -1,7 +1,6 @@
 import lightbulb
 import lynn
 
-
 async def invoke(context) -> None:
     if context.command is None:
         raise TypeError("This context cannot be invoked - no command was resolved.")

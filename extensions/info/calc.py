@@ -320,11 +320,12 @@ def eval_rpn(tokens):
 @lightbulb.command('calculator', 'combines numbers into other numbers', aliases=['math', 'calc'])
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def calculator(ctx: lightbulb.Context):
-    expr = tokenize(ctx.options.expr)
+    orig_expr = ctx.options.expr.replace('\\*', '*')
+    expr = tokenize(orig_expr)
     expr = implicit_multiplication(expr)
     expr = to_rpn(expr)
     expr = eval_rpn(expr)
-    return lynn.Message('> {} = `{}`'.format(ctx.options.expr, expr))
+    return lynn.Message('> `{} = {}`'.format(orig_expr, expr))
 
 
 PLUGIN_NAME = 'info'
