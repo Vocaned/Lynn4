@@ -4,10 +4,7 @@ import lightbulb
 import lynn
 from helpers import rest, escape_url
 
-plugin = lightbulb.Plugin('weather')
-
 @lightbulb.option('city', 'City to search weather in', modifier=lightbulb.commands.OptionModifier.CONSUME_REST)
-@plugin.command
 @lightbulb.command('weather', 'Is it raining today?', auto_defer=True)
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def weather(ctx: lightbulb.Context):
@@ -46,8 +43,9 @@ async def weather(ctx: lightbulb.Context):
                         embed=embed, image=f"https://wttr.in/{geocoding[0]['lat']},{geocoding[0]['lon']}.png", output=out)
 
 
-def load(bot: lynn.Bot):
-    bot.add_plugin(plugin)
-
-def unload(bot: lynn.Bot):
-    bot.remove_plugin(plugin)
+PLUGIN_NAME = 'apis'
+PLUGIN_DESC = 'Getting data from APIs around the internet'
+COMMANDS = [
+    weather
+]
+LISTENERS = {}

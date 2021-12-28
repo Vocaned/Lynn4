@@ -7,10 +7,7 @@ import psutil
 import lynn
 import helpers
 
-plugin = lightbulb.Plugin('info', 'Commands related to getting information')
-
 @lightbulb.add_cooldown(60, 1, lightbulb.ChannelBucket)
-@plugin.command
 @lightbulb.command('ping', 'pong')
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def ping_cmd(ctx: lightbulb.Context):
@@ -44,7 +41,6 @@ async def ping_cmd(ctx: lightbulb.Context):
     await firstmsg.edit(embed=embed)
 
 @lightbulb.option('snowflake', 'Snowflake to get information from', hikari.Snowflake)
-@plugin.command
 @lightbulb.command('snowflake', 'Get information from a snowflake')
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def snowflake(ctx: lightbulb.Context):
@@ -56,7 +52,6 @@ async def snowflake(ctx: lightbulb.Context):
     return lynn.Message(embed=embed)
 
 @lightbulb.option('color', 'Color to get information about', hikari.Color)
-@plugin.command
 @lightbulb.command('color', 'Get information about a color', aliases=['col', 'hex'])
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def color(ctx: lightbulb.Context):
@@ -66,8 +61,9 @@ async def color(ctx: lightbulb.Context):
     embed.add_field('Blue', f'{ctx.options.color.rgb[2]} ({ctx.options.color.rgb_float[2]*100:.2f}%)')
     return lynn.Message(embed=embed)
 
-def load(bot: lynn.Bot):
-    bot.add_plugin(plugin)
-
-def unload(bot: lynn.Bot):
-    bot.remove_plugin(plugin)
+PLUGIN_NAME = 'info'
+PLUGIN_DESC = 'All kinds of information about all kinds of things'
+COMMANDS = [
+    ping_cmd, snowflake, color
+]
+LISTENERS = {}

@@ -9,6 +9,8 @@ import time
 import sys
 import typing
 import io
+import importlib
+import types
 
 from helpers import rest, RestOptions
 import hikari
@@ -96,6 +98,57 @@ class Bot(lightbulb.BotApp):
 
         super().__init__(token=self.token, prefix=self.prefix, *args, **kwargs)
 
+    def make_plugin(self, name: str, description: typing.Optional[str] = None, include_datastore: bool = False) -> lightbulb.Plugin:
+        """Gets plugin if it's already loaded by bot, or creates a new one if not"""
+        plugin = self.get_plugin(name)
+        if plugin:
+            return plugin
+
+        plugin = lightbulb.Plugin(name, description, include_datastore)
+        self.add_plugin(plugin)
+        return plugin
+
+    def readd_plugin(self, plugin: lightbulb.Plugin) -> None:
+        plugin.app = self
+
+        for command in plugin._all_commands:
+            try:
+                self._add_command_to_correct_attr(command)
+            except lightbulb.errors.CommandAlreadyExists:
+                pass
+        for event, listeners in plugin._listeners.items():
+            for listener in listeners:
+                if listener not in self.get_listeners(event):
+                    self.subscribe(event, listener)
+        logging.debug("Plugin registered %r", plugin.name)
+        self._plugins[plugin.name] = plugin
+
+    def clean_plugin(self, plugin: lightbulb.Plugin) -> None:
+        """Removes a plugin if all commands and listeners are removed"""
+        if len(plugin.raw_commands) == 0 and len(plugin._listeners) == 0:
+            self.remove_plugin(plugin)
+
+    def load_extension(self, extension):
+        """Loads an extension using a pre-made load/unload functions"""
+        if extension in self.extensions:
+            raise lightbulb.errors.ExtensionAlreadyLoaded(f"Extension {extension!r} is already loaded.")
+
+        try:
+            ext = importlib.import_module(extension)
+        except ModuleNotFoundError:
+            raise lightbulb.errors.ExtensionNotFound(f"No extension by the name {extension!r} was found") from None
+
+        if not hasattr(ext, 'load') and not hasattr(ext, 'unload'):
+            ext.load = extension_load.__get__(ext)
+            ext.unload = extension_unload.__get__(ext)
+
+        self._current_extension = ext
+        ext.load(self)
+        self.extensions.append(extension)
+        logging.info("Extension loaded %r", extension)
+        self._current_extension = None
+
+
 class TemporaryFile:
     def __init__(self, filename: str = None) -> None:
         self.directory = tempfile.TemporaryDirectory()
@@ -134,19 +187,19 @@ def typeparser(last_option: str, default: MessageOutput, implements: MessageOutp
         last_option = ' '.join(last_option.split()[:-1])
 
         if last_word == '>text':
-            if implements & MessageOutput.content == MessageOutput.content:
+            if implements & MessageOutput.content != MessageOutput.content:
                 raise Error('This command doesn\'t support the output type ' + last_word)
             default = MessageOutput.content
         elif last_word == '>embed':
-            if implements & MessageOutput.content == MessageOutput.embed:
+            if implements & MessageOutput.content != MessageOutput.embed:
                 raise Error('This command doesn\'t support the output type ' + last_word)
             default = MessageOutput.embed
         elif last_word == '>image':
-            if implements & MessageOutput.content == MessageOutput.image:
+            if implements & MessageOutput.content != MessageOutput.image:
                 raise Error('This command doesn\'t support the output type ' + last_word)
             default = MessageOutput.image
         elif last_word == '>files':
-            if implements & MessageOutput.content == MessageOutput.files:
+            if implements & MessageOutput.content != MessageOutput.files:
                 raise Error('This command doesn\'t support the output type ' + last_word)
             default = MessageOutput.files
         else:
@@ -209,6 +262,34 @@ class Message:
             # Retry message without reply if REPLIES_UNKNOWN_MESSAGE
             return await bot.rest.create_message(channel, content, **out)
 
+def extension_load(ext, bot: Bot):
+    plugin = bot.make_plugin(ext.PLUGIN_NAME, ext.PLUGIN_DESC)
+
+    for c in ext.COMMANDS:
+        plugin.command(c)
+
+    for k,v in ext.LISTENERS.items():
+        plugin.listener(v, k)
+
+    bot.readd_plugin(plugin)
+
+def extension_unload(ext, bot: Bot):
+    plugin = bot.plugins[ext.PLUGIN_NAME]
+
+    for c in ext.COMMANDS:
+        bot.remove_command(c)
+        plugin.raw_commands.remove(c)
+
+    plugin._all_commands.clear()
+    plugin.create_commands()
+
+    for k,v in ext.LISTENERS.items():
+        bot.unsubscribe(v, k)
+
+    plugin._listeners = {k:v for k,v in plugin._listeners.items() if v not in ext.LISTENERS}
+
+    bot.readd_plugin(plugin)
+    bot.clean_plugin(plugin)
 
 ERROR_COLOR = 0xff4444
 EMBED_COLOR = 0x8f8f8f

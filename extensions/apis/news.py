@@ -8,11 +8,8 @@ import lynn
 import helpers
 from utils.rest import RestOptions
 
-plugin = lightbulb.Plugin('newsapis')
-
 @lightbulb.add_cooldown(5, 1, lightbulb.UserBucket)
 @lightbulb.option('query', 'Keyword to search for', required=False, modifier=lightbulb.commands.OptionModifier.CONSUME_REST)
-@plugin.command
 @lightbulb.command('news', 'Looks up news relating to a topic')
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def news(ctx: lightbulb.Context):
@@ -75,9 +72,9 @@ async def news(ctx: lightbulb.Context):
     await nav.run(ctx)
     return False
 
-
-def load(bot: lynn.Bot):
-    bot.add_plugin(plugin)
-
-def unload(bot: lynn.Bot):
-    bot.remove_plugin(plugin)
+PLUGIN_NAME = 'apis'
+PLUGIN_DESC = 'Getting data from APIs around the internet'
+COMMANDS = [
+    news
+]
+LISTENERS = {}

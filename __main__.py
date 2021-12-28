@@ -7,14 +7,13 @@ import lightbulb
 
 import lynn
 
-
 def create_bot() -> lynn.Bot:
     """Create and return bot"""
     bot = lynn.Bot(intents=hikari.Intents.ALL)
 
     for extension in [f.replace('.py', '').replace('/', '.').replace('\\', '.') for f in glob.glob('extensions/**/*.py', recursive=True)]:
         try:
-            bot.load_extensions(extension)
+            bot.load_extension(extension)
         except lightbulb.errors.LightbulbError as e:
             logging.error('Failed to load extension: %s', e)
 

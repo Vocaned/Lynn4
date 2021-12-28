@@ -5,8 +5,6 @@ import hikari
 import lynn
 import lightbulb
 
-plugin = lightbulb.Plugin('calculator')
-
 """calclib - Stuff used by calc"""
 
 # https://github.com/lambda-fairy/calc
@@ -319,7 +317,6 @@ def eval_rpn(tokens):
         return stack[0]
 
 @lightbulb.option('expr', 'Expression', modifier=lightbulb.commands.OptionModifier.CONSUME_REST)
-@plugin.command
 @lightbulb.command('calculator', 'combines numbers into other numbers', aliases=['math', 'calc'])
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def calculator(ctx: lightbulb.Context):
@@ -330,8 +327,9 @@ async def calculator(ctx: lightbulb.Context):
     return lynn.Message('> {} = `{}`'.format(ctx.options.expr, expr))
 
 
-def load(bot: lynn.Bot):
-    bot.add_plugin(plugin)
-
-def unload(bot: lynn.Bot):
-    bot.remove_plugin(plugin)
+PLUGIN_NAME = 'info'
+PLUGIN_DESC = 'All kinds of information about all kinds of things'
+COMMANDS = [
+    calculator
+]
+LISTENERS = {}

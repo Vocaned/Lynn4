@@ -3,11 +3,8 @@ import lightbulb
 import lynn
 import helpers
 
-plugin = lightbulb.Plugin('apis', 'Commands that get information from web APIs')
-
 @lightbulb.add_cooldown(5, 1, lightbulb.UserBucket)
 @lightbulb.option('query', 'Query for WolframAlpha', modifier=lightbulb.commands.OptionModifier.CONSUME_REST)
-@plugin.command
 @lightbulb.command('wolframalpha', 'Queries WolframAlpha', aliases=['wa', 'wolfram'], auto_defer=True)
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def wolframalpha(ctx: lightbulb.Context):
@@ -40,8 +37,9 @@ async def wolframalpha(ctx: lightbulb.Context):
     return lynn.Message(image=data, output=out)
 
 
-def load(bot: lynn.Bot):
-    bot.add_plugin(plugin)
-
-def unload(bot: lynn.Bot):
-    bot.remove_plugin(plugin)
+PLUGIN_NAME = 'apis'
+PLUGIN_DESC = 'Getting data from APIs around the internet'
+COMMANDS = [
+    wolframalpha
+]
+LISTENERS = {}

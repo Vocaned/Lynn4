@@ -11,12 +11,9 @@ try:
 except ImportError:
     import youtube_dl as yt_dl
 
-plugin = lightbulb.Plugin('media', 'Commands related to media')
-
 # TODO: timeout commands after n seconds
 @lightbulb.add_cooldown(10, 1, lightbulb.UserBucket)
 @lightbulb.option('link', 'Link to the video')
-@plugin.command
 @lightbulb.command('youtubedl', 'Downloads a video', aliases=['youtube-dl', 'ytdl', 'dl', 'download'], auto_defer=True)
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def youtubedl(ctx: lightbulb.Context):
@@ -61,7 +58,6 @@ async def download(ctx: lightbulb.Context):
 @lightbulb.option('args', 'Arguments for the action')
 @lightbulb.option('action', 'Action to make on the video')
 @lightbulb.set_help(docstring=True)
-@plugin.command
 @lightbulb.command('ffmpeg', 'Edits a video', aliases=['editvideo', 'videoedit'], auto_defer=True)
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def edit(ctx: lightbulb.Context):
@@ -130,8 +126,9 @@ async def edit(ctx: lightbulb.Context):
         return lynn.Message(files=[tmpfile,])
 
 
-def load(bot: lynn.Bot):
-    bot.add_plugin(plugin)
-
-def unload(bot: lynn.Bot):
-    bot.remove_plugin(plugin)
+PLUGIN_NAME = 'media'
+PLUGIN_DESC = 'Commands related to audio, video and images'
+COMMANDS = [
+    youtubedl, edit
+]
+LISTENERS = {}

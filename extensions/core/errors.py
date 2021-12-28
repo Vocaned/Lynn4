@@ -8,10 +8,6 @@ import lightbulb
 import lynn
 from lightbulb import errors
 
-
-plugin = lightbulb.Plugin('errors')
-
-@plugin.listener(lightbulb.CommandErrorEvent)
 async def handle_command_error(event: lightbulb.CommandErrorEvent):
     error = event.exception
     if isinstance(error, errors.CommandNotFound) \
@@ -101,7 +97,6 @@ async def handle_command_error(event: lightbulb.CommandErrorEvent):
     await lynn.Message(embed=embed).send(event.context)
 
 @lightbulb.add_checks(lightbulb.owner_only)
-@plugin.command
 @lightbulb.command('debug', 'Displays traceback from the last error')
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def debug(ctx: lightbulb.Context):
@@ -112,8 +107,12 @@ async def debug(ctx: lightbulb.Context):
         else:
             return lynn.Message(f'```{error}```')
 
-def load(bot: lynn.Bot):
-    bot.add_plugin(plugin)
 
-def unload(bot: lynn.Bot):
-    bot.remove_plugin(plugin)
+PLUGIN_NAME = 'core'
+PLUGIN_DESC = 'Core features for Lynn'
+COMMANDS = [
+    debug
+]
+LISTENERS = {
+    handle_command_error: lightbulb.CommandErrorEvent
+}
