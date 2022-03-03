@@ -40,7 +40,7 @@ async def translate(ctx: lightbulb.Context):
         confidence = f'(confidence: {round(data[6]*100)}%)'
 
 
-    embed = hikari.Embed(title='Google Translate', description=confidence)
+    embed = hikari.Embed(title='Google Translate', description=confidence, color=lynn.EMBED_COLOR)
     embed.add_field(f'From `{fromlang}`', query)
     embed.add_field(f'To `{outlang}`', data[0][0][0])
     return lynn.Message(content=f'{fromlang} -> {outlang}: {data[0][0][0]} {confidence}',

@@ -103,6 +103,7 @@ async def purge(ctx: lightbulb.Context) -> None:
 
     messages = await ctx.app.rest.fetch_messages(ctx.channel_id).filter(memberfilter).filter(toooldfilter).limit(ctx.options.amount+1)
     await ctx.app.rest.delete_messages(ctx.channel_id, *messages)
+    return False
 
 PLUGIN_NAME = 'mod'
 PLUGIN_DESC = 'Commands related to Discord moderation'
