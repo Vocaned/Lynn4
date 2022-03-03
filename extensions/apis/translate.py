@@ -3,6 +3,7 @@ import hikari
 import lightbulb
 import lynn
 from helpers import rest, RestOptions
+from pycountry import languages
 
 @lightbulb.option('query', 'Sentence to translate', modifier=lightbulb.commands.OptionModifier.CONSUME_REST)
 @lightbulb.command('translate', 'これは英語で何を言っているのだろうか？', aliases=['trans'], auto_defer=True)
@@ -20,9 +21,18 @@ async def translate(ctx: lightbulb.Context):
     newquery = []
     for word in query.split():
         if word.startswith('from:') and word != 'from:': # check that there's no space after from:
-            inlang = word.split(':')[1]
+            try:
+                inlang = languages.lookup(word.split(':')[1])
+            except LookupError as e:
+                raise lynn.Error(f"No language found by `{word.split(':')[1]}`") from e
+            inlang = inlang.alpha_2
         elif word.startswith('to:') and word != 'to:':
-            outlang = word.split(':')[1]
+            try:
+                outlang = languages.lookup(word.split(':')[1])
+            except LookupError as e:
+                raise lynn.Error(f"No language found by `{word.split(':')[1]}`") from e
+            tolang = outlang.name
+            outlang = outlang.alpha_2
         else:
             newquery.append(word)
     query = ' '.join(newquery)
@@ -33,7 +43,11 @@ async def translate(ctx: lightbulb.Context):
         await ctx.reply('Did not get a response from Google. Probably an invalid language.')
         return
 
-    fromlang = data[2]
+    fromlang = languages.get(alpha_2=data[2])
+    if not fromlang:
+        fromlang = data[2]
+    else:
+        fromlang = fromlang.name
 
     confidence = ''
     if data[6] and data[6] != 1:
@@ -42,8 +56,8 @@ async def translate(ctx: lightbulb.Context):
 
     embed = hikari.Embed(title='Google Translate', description=confidence, color=lynn.EMBED_COLOR)
     embed.add_field(f'From `{fromlang}`', query)
-    embed.add_field(f'To `{outlang}`', data[0][0][0])
-    return lynn.Message(content=f'{fromlang} -> {outlang}: {data[0][0][0]} {confidence}',
+    embed.add_field(f'To `{tolang}`', data[0][0][0])
+    return lynn.Message(content=f'{fromlang} -> {tolang}: {data[0][0][0]} {confidence}',
                         embed=embed, output=out)
 
 
