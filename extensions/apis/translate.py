@@ -1,3 +1,4 @@
+from argparse import ArgumentError
 import datetime
 import hikari
 import lightbulb
@@ -23,17 +24,21 @@ async def translate(ctx: lightbulb.Context):
     for word in query.split():
         if word.startswith('from:') and word != 'from:': # check that there's no space after from:
             try:
+                if inlang == 'en': # En is a language with like 200 native speakers.. english is more important
+                    inlang = 'eng'
                 inlang = languages.lookup(word.split(':')[1])
-            except LookupError as e:
-                raise lynn.Error(f"No language found by `{word.split(':')[1]}`") from e
-            inlang = inlang.alpha_2
+                inlang = inlang.alpha_2
+            except:
+                raise lynn.Error(f"No language found by `{word.split(':')[1]}`")
         elif word.startswith('to:') and word != 'to:':
             try:
+                if outlang == 'en': # En is a language with like 200 native speakers.. english is more important
+                    outlang = 'eng'
                 outlang = languages.lookup(word.split(':')[1])
-            except LookupError as e:
-                raise lynn.Error(f"No language found by `{word.split(':')[1]}`") from e
+                outlang = outlang.alpha_2
+            except:
+                raise lynn.Error(f"No language found by `{word.split(':')[1]}`")
             tolang = outlang.name
-            outlang = outlang.alpha_2
         else:
             newquery.append(word)
     query = ' '.join(newquery)
