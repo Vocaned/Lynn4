@@ -17,6 +17,7 @@ async def translate(ctx: lightbulb.Context):
 
     inlang = 'auto'
     outlang = 'en'
+    tolang = 'English'
 
     newquery = []
     for word in query.split():
