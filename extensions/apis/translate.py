@@ -35,10 +35,10 @@ async def translate(ctx: lightbulb.Context):
                 if outlang == 'en': # En is a language with like 200 native speakers.. english is more important
                     outlang = 'eng'
                 outlang = languages.lookup(word.split(':')[1])
-                outlang = outlang.alpha_2
             except:
                 raise lynn.Error(f"No language found by `{word.split(':')[1]}`")
             tolang = outlang.name
+            outlang = outlang.alpha_2
         else:
             newquery.append(word)
     query = ' '.join(newquery)
