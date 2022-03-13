@@ -24,17 +24,19 @@ async def translate(ctx: lightbulb.Context):
     for word in query.split():
         if word.startswith('from:') and word != 'from:': # check that there's no space after from:
             try:
+                inlang = word.split(':')[1].lower()
                 if inlang == 'en': # En is a language with like 200 native speakers.. english is more important
                     inlang = 'eng'
-                inlang = languages.lookup(word.split(':')[1])
+                inlang = languages.lookup(inlang)
                 inlang = inlang.alpha_2
             except:
                 raise lynn.Error(f"No language found by `{word.split(':')[1]}`")
         elif word.startswith('to:') and word != 'to:':
             try:
+                outlang = word.split(':')[1].lower()
                 if outlang == 'en': # En is a language with like 200 native speakers.. english is more important
                     outlang = 'eng'
-                outlang = languages.lookup(word.split(':')[1])
+                outlang = languages.lookup(outlang)
             except:
                 raise lynn.Error(f"No language found by `{word.split(':')[1]}`")
             tolang = outlang.name
